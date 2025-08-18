@@ -73,7 +73,6 @@ async function displayUserProfile() {
             populateElement('occupation', other.occupation);
             populateElement('skills', other.skills);
             populateElement('join-date', other.joinDate);
-            // --- NEW LINE ADDED HERE ---
             populateElement('referrer-name', other.referrerName);
             
             // Populate Emergency Contact
