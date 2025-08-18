@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body class="flex h-screen overflow-hidden">
+    <aside class="w-64 flex-shrink-0 bg-gray-900 p-4 flex flex-col justify-between">
+        <div>
+            <div class="flex items-center mb-8">
+                 <svg class="h-8 w-8 text-white mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <h1 class="text-xl font-bold text-white">CIA TASK FORCE</h1>
+            </div>
+            <nav class="space-y-2">
+                <a href="./dashboard.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-home sidebar-icon mr-3"></i> Home</a>
+                <a href="./register.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-white bg-gray-700 rounded-lg"><i class="fas fa-user-plus sidebar-icon mr-3"></i> Register</a>
+                <a href="./accounts.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-users sidebar-icon mr-3"></i> Accounts</a>
+                <a href="#" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-chart-line sidebar-icon mr-3"></i> Analytics</a>
+                <a href="#" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-cog sidebar-icon mr-3"></i> Settings</a>
+            </nav>
+        </div>
+        <div class="relative">
+            <div id="logoutMenu" class="absolute bottom-full left-0 mb-2 w-full bg-gray-800 rounded-lg shadow-lg hidden">
+                <a href="#" id="logoutButton" class="flex items-center px-4 py-3 text-sm text-red-400 hover:bg-gray-700 rounded-lg"><i class="fas fa-sign-out-alt w-5 h-5 mr-3"></i>Logout</a>
+            </div>
+            <div id="userProfileButton" class="flex items-center p-2 border-t border-gray-700 mt-4 cursor-pointer hover:bg-gray-800 rounded-lg">
+                <img class="h-10 w-10 rounded-full object-cover" src="https://placehold.co/100x100/667eea/ffffff?text=RR" alt="User avatar">
+                <div class="ml-3">
+                    <p class="text-sm font-semibold text-white">Riley Carter</p>
+                    <p class="text-xs text-gray-400">riley@email.com</p>
+                </div>
+                 <div class="ml-auto text-gray-400"><i class="fas fa-ellipsis-v"></i></div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto p-8">
+        <header class="flex items-center justify-between pb-4 border-b border-gray-700">
+            <div>
+                <h2 class="text-2xl font-bold text-white">Register New User</h2>
+                <p class="text-gray-400">Add a new user to the system.</p>
+            </div>
+        </header>
+
+        <div class="mt-6">
+            <form id="registrationForm" class="bg-gray-800 p-8 rounded-lg text-gray-300">
+                <h3 class="text-lg font-semibold text-white mb-6 border-b border-gray-700 pb-3">Personal Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="id-no" class="block text-sm font-medium">ID No.</label>
+                        <input type="text" id="id-no" readonly class="mt-2 block w-full bg-gray-700 border-gray-600 rounded-lg px-4 py-2.5 cursor-not-allowed">
+                    </div>
+                    <div class="md:col-span-2"></div>
+                    <div>
+                        <label for="first-name" class="block text-sm font-medium">First Name</label>
+                        <input type="text" id="first-name" required class="form-input">
+                    </div>
+                    <div>
+                        <label for="middle-name" class="block text-sm font-medium">Middle Name</label>
+                        <input type="text" id="middle-name" class="form-input">
+                    </div>
+                    <div>
+                        <label for="last-name" class="block text-sm font-medium">Last Name</label>
+                        <input type="text" id="last-name" required class="form-input">
+                    </div>
+                    <div>
+                        <label for="contact-no" class="block text-sm font-medium">Contact No.</label>
+                        <input type="tel" id="contact-no" class="form-input">
+                    </div>
+                    <div>
+                        <label for="dob" class="block text-sm font-medium">Date of Birth</label>
+                        <input type="date" id="dob" required class="form-input">
+                    </div>
+                    <div>
+                        <label for="age" class="block text-sm font-medium">Age</label>
+                        <input type="number" id="age" class="form-input">
+                    </div>
+                    <div>
+                        <label for="sex" class="block text-sm font-medium">Sex</label>
+                        <select id="sex" required class="form-input">
+                            <option value="" disabled selected>Select Sex</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="blood-type" class="block text-sm font-medium">Blood Type</label>
+                        <input type="text" id="blood-type" class="form-input" placeholder="If known">
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-semibold text-white mt-10 mb-6 border-b border-gray-700 pb-3">Address</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div>
+                        <label for="region" class="block text-sm font-medium">Region</label>
+                        <select id="region" required class="form-input">
+                            <option value="" disabled selected>Select Region</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="province" class="block text-sm font-medium">Province</label>
+                        <select id="province" required class="form-input" disabled>
+                            <option value="" disabled selected>Select Province</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="city" class="block text-sm font-medium">City / Municipality</label>
+                        <select id="city" required class="form-input" disabled>
+                             <option value="" disabled selected>Select City / Municipality</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="barangay" class="block text-sm font-medium">Barangay</label>
+                        <select id="barangay" required class="form-input" disabled>
+                            <option value="" disabled selected>Select Barangay</option>
+                        </select>
+                    </div>
+                </div>
+                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                     <div>
+                        <label for="zip-code" class="block text-sm font-medium">Zip / Postal code</label>
+                        <input type="text" id="zip-code" class="form-input">
+                    </div>
+                 </div>
+
+                <h3 class="text-lg font-semibold text-white mt-10 mb-6 border-b border-gray-700 pb-3">Other Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="occupation" class="block text-sm font-medium">Occupation</label>
+                        <input type="text" id="occupation" class="form-input">
+                    </div>
+                    <div>
+                        <label for="skills" class="block text-sm font-medium">Skills</label>
+                        <input type="text" id="skills" class="form-input">
+                    </div>
+                    <div>
+                        <label for="join-date" class="block text-sm font-medium">Join Date</label>
+                        <input type="date" id="join-date" class="form-input">
+                    </div>
+                    <div>
+                        <label for="referrer-name" class="block text-sm font-medium">Referrer's Name</label>
+                        <input type="text" id="referrer-name" class="form-input" placeholder="Leave blank if direct">
+                    </div>
+                </div>
+                <h3 class="text-lg font-semibold text-white mt-10 mb-6 border-b border-gray-700 pb-3">Emergency Contact Person</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="ec-last-name" class="block text-sm font-medium">Last Name</label>
+                        <input type="text" id="ec-last-name" class="form-input">
+                    </div>
+                    <div>
+                        <label for="ec-first-name" class="block text-sm font-medium">First Name</label>
+                        <input type="text" id="ec-first-name" class="form-input">
+                    </div>
+                     <div>
+                        <label for="ec-middle-name" class="block text-sm font-medium">Middle Name</label>
+                        <input type="text" id="ec-middle-name" class="form-input">
+                    </div>
+                    <div>
+                        <label for="ec-nickname" class="block text-sm font-medium">Nickname</label>
+                        <input type="text" id="ec-nickname" class="form-input">
+                    </div>
+                    <div>
+                        <label for="ec-contact-no" class="block text-sm font-medium">Contact No.</label>
+                        <input type="tel" id="ec-contact-no" class="form-input">
+                    </div>
+                    <div class="md:col-span-3">
+                        <label for="ec-address" class="block text-sm font-medium">Address</label>
+                        <input type="text" id="ec-address" class="form-input">
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-8">
+                    <button type="submit" class="inline-flex justify-center py-2.5 px-6 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500">
+                        Register User
+                    </button>
+                </div>
+                 <div id="form-message" class="text-center mt-4"></div>
+            </form>
+        </div>
+    </main>
+    <style>
+        .form-input {
+            margin-top: 0.5rem;
+            display: block;
+            width: 100%;
+            background-color: #1f2937; /* bg-gray-800 */
+            border: 1px solid #4b5563; /* border-gray-600 */
+            border-radius: 0.5rem; /* rounded-lg */
+            padding: 0.625rem 1rem; /* px-4 py-2.5 */
+            color: white;
+        }
+        .form-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #3b82f6; /* Equivalent to focus:ring-2 focus:ring-blue-500 */
+            border-color: transparent;
+        }
+         .form-input:disabled {
+            background-color: #374151; /* bg-gray-700 */
+            cursor: not-allowed;
+            color: #9ca3af; /* text-gray-400 */
+        }
+        
+        /* Custom styling for dropdowns to fix UI issues */
+        select.form-input {
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+    </style>
+    
+    <script type="module" src="../js/auth.js"></script>
+    <script type="module" src="../js/register.js"></script>
+</body>
+</html>

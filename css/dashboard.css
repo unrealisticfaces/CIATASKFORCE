@@ -1,0 +1,50 @@
+/* Base styles */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #111827; /* Dark background from dark theme */
+    color: #d1d5db; /* Default text color */
+}
+
+/* Custom scrollbar for a better look in dark mode */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #1f2937;
+}
+::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+}
+
+/* Sidebar icon sizing */
+.sidebar-icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* * CHART FIX: 
+ * These container styles are the key to fixing the rendering issue.
+ * By giving the parent div a defined height and relative positioning,
+ * we give the Chart.js canvas a stable container to render inside.
+*/
+
+.chart-container-mini {
+    position: relative;
+    height: 60px; /* Height for the small stat charts */
+    margin-top: 1rem;
+}
+
+.chart-container-large {
+    position: relative;
+    height: 300px; /* Height for the larger charts */
+    margin-top: 1rem;
+}
+.chart-container-doughnut {
+    position: relative;
+    height: 180px;
+    width: 180px;
+}

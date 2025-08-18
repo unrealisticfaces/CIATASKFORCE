@@ -1,0 +1,42 @@
+/* Styling for the modal form inputs */
+#userForm input,
+#userForm select {
+    width: 100%;
+    background-color: #374151; /* bg-gray-700 */
+    color: #d1d5db; /* text-gray-300 */
+    border: 1px solid #4b5563; /* border-gray-600 */
+    border-radius: 0.5rem; /* rounded-lg */
+    padding: 0.75rem 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#userForm input:focus,
+#userForm select:focus {
+    outline: none;
+    border-color: #3b82f6; /* focus:border-blue-500 */
+    box-shadow: 0 0 0 2px #1e40af; /* focus:ring */
+}
+
+#userForm input::placeholder {
+    color: #9ca3af; /* placeholder-gray-400 */
+}
+
+/* Style for date input placeholder */
+#userForm input[type="date"]:invalid::-webkit-calendar-picker-indicator {
+    filter: invert(0.6);
+}
+
+/* Custom scrollbar for the modal */
+#userModal .overflow-y-auto::-webkit-scrollbar {
+    width: 8px;
+}
+#userModal .overflow-y-auto::-webkit-scrollbar-track {
+    background: #1f2937;
+}
+#userModal .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 4px;
+}
+#userModal .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+}
