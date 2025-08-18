@@ -26,7 +26,7 @@ body {
     height: 20px;
 }
 
-/* * CHART FIX:
+/* * CHART FIX: 
  * These container styles are the key to fixing the rendering issue.
  * By giving the parent div a defined height and relative positioning,
  * we give the Chart.js canvas a stable container to render inside.
@@ -47,66 +47,4 @@ body {
     position: relative;
     height: 180px;
     width: 180px;
-}
-
-/* --- Responsive Layout Adjustments --- */
-/* Mobile-first approach: These styles apply to small screens by default */
-.flex-1 {
-    width: 100%;
-}
-
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 102; /* NEW: Highest z-index to be above the overlay and content */
-    transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
-}
-
-.sidebar.open {
-    transform: translateX(0);
-}
-
-.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 101; /* NEW: A higher z-index than main content but lower than the sidebar */
-    display: none;
-}
-
-.menu-button {
-    display: block;
-    position: fixed; 
-    top: 1rem;
-    left: 1rem;
-    z-index: 103; /* NEW: Highest z-index to be on top of everything and always clickable */
-    color: white;
-}
-
-.main-content {
-    margin-top: 5rem; 
-    /* NEW: Add a z-index to control its stacking order relative to the overlay if needed, although the overlay should handle it. */
-    /* z-index: 1; */
-}
-
-/* Tablet and larger screens (md breakpoint from Tailwind) */
-@media (min-width: 768px) {
-    .sidebar {
-        position: static;
-        transform: translateX(0);
-        z-index: auto; /* Reset z-index for desktop layout */
-    }
-
-    .menu-button, .overlay {
-        display: none;
-    }
-
-    .main-content {
-        margin-top: 0;
-    }
 }

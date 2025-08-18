@@ -4,14 +4,14 @@ import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDA_q4-NEMJij-ojfQIahQRFov1n6p7qNM",
-  authDomain: "cia-bayanihan-app.firebaseapp.com",
-  databaseURL: "https://cia-bayanihan-app-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "cia-bayanihan-app",
-  storageBucket: "cia-bayanihan-app.appspot.com",
-  messagingSenderId: "35363747720",
-  appId: "1:35363747720:web:23840cad1a7f8f3f442c3d",
-  measurementId: "G-8BGFGETSKD"
+    apiKey: "AIzaSyDA_q4-NEMJij-ojfQIahQRFov1n6p7qNM",
+    authDomain: "cia-bayanihan-app.firebaseapp.com",
+    databaseURL: "https://cia-bayanihan-app-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "cia-bayanihan-app",
+    storageBucket: "cia-bayanihan-app.appspot.com",
+    messagingSenderId: "35363747720",
+    appId: "1:35363747720:web:23840cad1a7f8f3f442c3d",
+    measurementId: "G-8BGFGETSKD"
 };
 
 // Initialize Firebase
@@ -28,32 +28,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         let usersArray = [];
         if (snapshot.exists()) {
             usersArray = Object.values(snapshot.val());
+        } else {
+            console.log("No users found in the database.");
+            return;
         }
-        
+
         // Update the main "Users" stat card
         const totalUsersStat = document.getElementById('total-users-stat');
         if (totalUsersStat) {
             totalUsersStat.textContent = usersArray.length.toLocaleString();
         }
-        
-        // Process data for INTERACTIVE USERS chart
+
+        // Process data for DAILY USERS chart
         const dailyRegistrations = usersArray.reduce((acc, user) => {
             const date = user.otherInfo?.joinDate;
-            if(date) {
-                acc[date] = (acc[date] || 0) + 1;
+            if (date) {
+                // Parse date string to a consistent format (YYYY-MM-DD)
+                const dateParts = date.split('-');
+                const formattedDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]).toISOString().split('T')[0];
+                acc[formattedDate] = (acc[formattedDate] || 0) + 1;
             }
             return acc;
         }, {});
 
         const userLabels = [];
         const userData = [];
+        
+        // Generate labels and data for the last 30 days
         for (let i = 29; i >= 0; i--) {
             const d = new Date();
             d.setDate(d.getDate() - i);
             const dateString = d.toISOString().split('T')[0];
-            userLabels.push(dateString);
+            const formattedLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            userLabels.push(formattedLabel);
             userData.push(dailyRegistrations[dateString] || 0);
         }
+        
         createInteractiveUsersChart('usersChart', userLabels, userData, '#22c55e');
 
         // --- Process data for SESSIONS (Referral vs Direct) chart ---
@@ -65,13 +75,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             acc[region] = (acc[region] || 0) + 1;
             return acc;
         }, {});
-        
+
         createRegionChart(regionCounts, usersArray.length);
-        
+
         // --- Initialize other static charts ---
         createMiniChart('conversionsChart', [80, 75, 60, 65, 50, 45, 40, 35, 30, 25], '#ef4444');
         initializeMonthlySessionsChart(usersArray);
-        
+
     } catch (error) {
         console.error("Failed to fetch user data for charts:", error);
     }
@@ -87,7 +97,7 @@ function createMiniChart(canvasId, data, color) {
     const gradient = ctx.createLinearGradient(0, 0, 0, 60);
     gradient.addColorStop(0, `${color}4D`);
     gradient.addColorStop(1, `${color}00`);
-    new Chart(ctx, { type: 'line', data: { labels: Array(data.length).fill(''), datasets: [{ data: data, borderColor: color, borderWidth: 2, fill: true, backgroundColor: gradient, tension: 0.4, pointRadius: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display:false } } } });
+    new Chart(ctx, { type: 'line', data: { labels: Array(data.length).fill(''), datasets: [{ data: data, borderColor: color, borderWidth: 2, fill: true, backgroundColor: gradient, tension: 0.4, pointRadius: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } } });
 }
 
 function createInteractiveUsersChart(canvasId, labels, data, color) {
@@ -126,8 +136,8 @@ function createInteractiveUsersChart(canvasId, labels, data, color) {
                     displayColors: false,
                     callbacks: {
                         title: function(tooltipItems) {
-                             const date = new Date(tooltipItems[0].label);
-                             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                            const date = new Date(tooltipItems[0].label);
+                            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                         },
                         label: function(tooltipItem) {
                             return `Users: ${tooltipItem.raw}`;
@@ -140,7 +150,7 @@ function createInteractiveUsersChart(canvasId, labels, data, color) {
     });
 }
 
-// Sessions Chart (UPDATED with 5-day intervals)
+// Sessions Chart
 function initializeSessionsChart(usersArray) {
     const sessionsCanvas = document.getElementById('sessionsChart');
     if (!sessionsCanvas) return;
@@ -152,6 +162,7 @@ function initializeSessionsChart(usersArray) {
         const date = user.otherInfo?.joinDate;
         if (!date) return;
 
+        // Correctly check if the referrerName exists and is not an empty string
         if (user.otherInfo.referrerName && user.otherInfo.referrerName.trim() !== '') {
             referralCounts[date] = (referralCounts[date] || 0) + 1;
         } else {
@@ -166,30 +177,30 @@ function initializeSessionsChart(usersArray) {
     const bucketSize = 5;
     const numberOfBuckets = 6; // 6 buckets of 5 days = 30 days total
 
+    // Generate labels for the last 30 days
+    const today = new Date();
     for (let i = numberOfBuckets - 1; i >= 0; i--) {
-        let directSum = 0;
-        let referralSum = 0;
-        
-        // Create the label for the end of the bucket (e.g., "Aug 18", "Aug 13")
-        const bucketEndDate = new Date();
-        bucketEndDate.setDate(bucketEndDate.getDate() - (i * bucketSize));
-        const formattedLabel = bucketEndDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const startDate = new Date(today);
+        startDate.setDate(today.getDate() - (i * bucketSize));
+        const formattedLabel = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         labels.push(formattedLabel);
 
-        // Sum the data for the 5 days within this bucket
+        let directSum = 0;
+        let referralSum = 0;
+
         for (let j = 0; j < bucketSize; j++) {
-            const dayToSum = new Date();
-            dayToSum.setDate(bucketEndDate.getDate() - j);
+            const dayToSum = new Date(startDate);
+            dayToSum.setDate(startDate.getDate() + j);
             const dateString = dayToSum.toISOString().split('T')[0];
-            
+
             directSum += (directCounts[dateString] || 0);
             referralSum += (referralCounts[dateString] || 0);
         }
-        
+
         directData.push(directSum);
         referralData.push(referralSum);
     }
-    
+
     // 3. Create the chart
     const sessionsCtx = sessionsCanvas.getContext('2d');
     new Chart(sessionsCtx, {
@@ -220,13 +231,13 @@ function initializeSessionsChart(usersArray) {
             maintainAspectRatio: false,
             interaction: { mode: 'index', intersect: false },
             scales: {
-                y: { 
+                y: {
                     stacked: true,
                     beginAtZero: true,
                     grid: { color: '#374151' },
-                    ticks: { 
+                    ticks: {
                         color: '#9ca3af',
-                        precision: 0 
+                        precision: 0
                     }
                 },
                 x: {
@@ -244,7 +255,7 @@ function initializeSessionsChart(usersArray) {
     });
 }
 
-// NEW: Dynamically generate the "Sessions per month" chart
+// Monthly Sessions Chart
 function initializeMonthlySessionsChart(usersArray) {
     const pageViewsCanvas = document.getElementById('pageViewsChart');
     if (!pageViewsCanvas) return;
@@ -278,7 +289,7 @@ function initializeMonthlySessionsChart(usersArray) {
 
     const directData = sortedMonths.map(month => monthlyData[month].direct);
     const referralData = sortedMonths.map(month => monthlyData[month].referral);
-    
+
     const pageViewsCtx = pageViewsCanvas.getContext('2d');
     new Chart(pageViewsCtx, {
         type: 'bar',
@@ -300,7 +311,7 @@ function initializeMonthlySessionsChart(usersArray) {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                y: { 
+                y: {
                     beginAtZero: true,
                     grid: { color: '#374151' },
                     ticks: { color: '#9ca3af' }
@@ -327,7 +338,7 @@ function createRegionChart(regionData, totalUsers) {
 
     const labels = Object.keys(regionData);
     const data = Object.values(regionData);
-    
+
     const centerText = {
         id: 'centerText',
         afterDraw: (chart) => {
@@ -366,13 +377,13 @@ function createRegionChart(regionData, totalUsers) {
                     display: false
                 },
                 tooltip: {
-                    enabled: true 
+                    enabled: true
                 }
             }
         },
         plugins: [centerText]
     });
-    
+
     const legendContainer = document.getElementById('regionChartLegend');
     legendContainer.innerHTML = '';
     const colors = ['bg-blue-500', 'bg-blue-800', 'bg-blue-400', 'bg-blue-300', 'bg-purple-400'];
@@ -380,7 +391,7 @@ function createRegionChart(regionData, totalUsers) {
     labels.forEach((label, index) => {
         const percentage = ((regionData[label] / totalUsers) * 100).toFixed(0);
         const color = colors[index % colors.length];
-        
+
         const legendItem = `
             <div class="flex items-center justify-between text-sm">
                 <div class="flex items-center">

@@ -11,110 +11,116 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="../css/dashboard.css">
 </head>
-<body class="flex flex-col h-screen md:flex-row overflow-hidden">
+<body class="h-screen">
     <button id="menu-btn" class="menu-button p-2 md:hidden">
         <i class="fas fa-bars text-2xl"></i>
     </button>
     
     <div id="overlay" class="overlay"></div>
 
-    <aside id="sidebar" class="sidebar w-64 flex-shrink-0 bg-gray-900 p-4 flex flex-col justify-between z-50">
-        <div>
-            <div class="flex items-center mb-8">
-                 <svg class="h-8 w-8 text-white mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <h1 class="text-xl font-bold text-white">CIA Broadcast</h1>
-            </div>
-            <nav class="space-y-2">
-                <a href="./dashboard.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-home sidebar-icon mr-3"></i> Home</a>
-                <a href="./register.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-user-plus sidebar-icon mr-3"></i> Register</a>
-                <a href="./accounts.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-white bg-gray-700 rounded-lg"><i class="fas fa-users sidebar-icon mr-3"></i> Accounts</a>
-                <a href="#" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-chart-line sidebar-icon mr-3"></i> Analytics</a>
-                <a href="#" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-cog sidebar-icon mr-3"></i> Settings</a>
-            </nav>
-        </div>
-        <div class="relative">
-            <div id="logoutMenu" class="absolute bottom-full left-0 mb-2 w-full bg-gray-800 rounded-lg shadow-lg hidden">
-                <a href="#" id="logoutButton" class="flex items-center px-4 py-3 text-sm text-red-400 hover:bg-gray-700 rounded-lg"><i class="fas fa-sign-out-alt w-5 h-5 mr-3"></i>Logout</a>
-            </div>
-            <div id="userProfileButton" class="flex items-center p-2 border-t border-gray-700 mt-4 cursor-pointer hover:bg-gray-800 rounded-lg">
-                <img class="h-10 w-10 rounded-full object-cover" src="https://placehold.co/100x100/667eea/ffffff?text=RR" alt="User avatar">
-                <div class="ml-3">
-                    <p class="text-sm font-semibold text-white">Riley Carter</p>
-                    <p class="text-xs text-gray-400">riley@email.com</p>
-                </div>
-                 <div class="ml-auto text-gray-400"><i class="fas fa-ellipsis-v"></i></div>
-            </div>
-        </div>
-    </aside>
-
-    <main class="flex-1 overflow-y-auto p-8 main-content">
-        <header class="flex items-center justify-between pb-4 border-b border-gray-700">
+    <div class="flex flex-col h-screen md:flex-row main-wrapper">
+        <aside id="sidebar" class="sidebar w-64 flex-shrink-0 bg-gray-900 p-4 flex flex-col justify-between z-50">
             <div>
-                <h2 class="text-2xl font-bold text-white">User Profile</h2>
-                <p class="text-gray-400">Full details for user <span id="user-id-header" class="font-semibold text-white">...</span></p>
+                <div class="flex items-center mb-8">
+                    <svg class="h-8 w-8 text-white mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <h1 class="text-xl font-bold text-white">CIA Broadcast</h1>
+                </div>
+                <nav class="space-y-2">
+                    <a href="./dashboard.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-home sidebar-icon mr-3"></i> Home</a>
+                    <a href="./register.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-user-plus sidebar-icon mr-3"></i> Register</a>
+                    <a href="./accounts.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-white bg-gray-700 rounded-lg"><i class="fas fa-users sidebar-icon mr-3"></i> Accounts</a>
+                    <a href="#" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-chart-line sidebar-icon mr-3"></i> Analytics</a>
+                    <a href="#" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-cog sidebar-icon mr-3"></i> Settings</a>
+                </nav>
             </div>
-             <a href="./accounts.html" class="text-sm font-semibold text-blue-400 hover:text-blue-300">&larr; Back to Accounts</a>
-        </header>
+            <div class="relative">
+                <div id="logoutMenu" class="absolute bottom-full left-0 mb-2 w-full bg-gray-800 rounded-lg shadow-lg hidden">
+                    <a href="#" id="logoutButton" class="flex items-center px-4 py-3 text-sm text-red-400 hover:bg-gray-700 rounded-lg"><i class="fas fa-sign-out-alt w-5 h-5 mr-3"></i>Logout</a>
+                </div>
+                <div id="userProfileButton" class="flex items-center p-2 border-t border-gray-700 mt-4 cursor-pointer hover:bg-gray-800 rounded-lg">
+                    <img class="h-10 w-10 rounded-full object-cover" src="https://placehold.co/100x100/667eea/ffffff?text=RR" alt="User avatar">
+                    <div class="ml-3">
+                        <p class="text-sm font-semibold text-white">Riley Carter</p>
+                        <p class="text-xs text-gray-400">riley@email.com</p>
+                    </div>
+                    <div class="ml-auto text-gray-400"><i class="fas fa-ellipsis-v"></i></div>
+                </div>
+            </div>
+        </aside>
 
-        <div id="profile-container" class="mt-6 space-y-8">
-            <div class="bg-gray-800 p-6 rounded-lg">
-                <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-3">Personal Information</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 text-sm">
-                    <div><span class="text-gray-400">Full Name:</span> <span id="full-name" class="font-medium text-white"></span></div>
-                    <div><span class="text-gray-400">Contact No:</span> <span id="contact-no" class="font-medium text-white"></span></div>
-                    <div><span class="text-gray-400">Date of Birth:</span> <span id="dob" class="font-medium text-white"></span></div>
-                    <div><span class="text-gray-400">Age:</span> <span id="age" class="font-medium text-white"></span></div>
-                    <div><span class="text-gray-400">Sex:</span> <span id="sex" class="font-medium text-white"></span></div>
-                    <div><span class="text-gray-400">Blood Type:</span> <span id="blood-type" class="font-medium text-white"></span></div>
+        <main class="flex-1 overflow-y-auto p-8 main-content">
+            <header class="flex items-center justify-between pb-4 border-b border-gray-700">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">User Profile</h2>
+                    <p class="text-gray-400">Full details for user <span id="user-id-header" class="font-semibold text-white">...</span></p>
                 </div>
-            </div>
+                <a href="./accounts.html" class="text-sm font-semibold text-blue-400 hover:text-blue-300">&larr; Back to Accounts</a>
+            </header>
 
-            <div class="bg-gray-800 p-6 rounded-lg">
-                <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-3">Address</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 text-sm">
-                    <div><span class="text-gray-400">Region:</span> <span id="region" class="font-medium text-white"></span></div>
-                    <div><span class="text-gray-400">Province:</span> <span id="province" class="font-medium text-white"></span></div>
-                    <div><span class="text-gray-400">City/Municipality:</span> <span id="city" class="font-medium text-white"></span></div>
-                    <div><span class="text-gray-400">Barangay:</span> <span id="barangay" class="font-medium text-white"></span></div>
-                    <div><span class="text-gray-400">Zip Code:</span> <span id="zip-code" class="font-medium text-white"></span></div>
+            <div id="profile-container" class="mt-6 space-y-8">
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-3">Personal Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 text-sm">
+                        <div><span class="text-gray-400">Full Name:</span> <span id="full-name" class="font-medium text-white"></span></div>
+                        <div><span class="text-gray-400">Contact No:</span> <span id="contact-no" class="font-medium text-white"></span></div>
+                        <div><span class="text-gray-400">Date of Birth:</span> <span id="dob" class="font-medium text-white"></span></div>
+                        <div><span class="text-gray-400">Age:</span> <span id="age" class="font-medium text-white"></span></div>
+                        <div><span class="text-gray-400">Sex:</span> <span id="sex" class="font-medium text-white"></span></div>
+                        <div><span class="text-gray-400">Blood Type:</span> <span id="blood-type" class="font-medium text-white"></span></div>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="bg-gray-800 p-6 rounded-lg">
-                <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-3">Other Information</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-                    <div><span class="text-gray-400">Occupation:</span> <span id="occupation" class="font-medium text-white"></span></div>
-                    <div><span class="text-gray-400">Skills:</span> <span id="skills" class="font-medium text-white"></span></div>
-                    <div><span class="text-gray-400">Join Date:</span> <span id="join-date" class="font-medium text-white"></span></div>
-                    <div><span class="text-gray-400">Referred By:</span> <span id="referrer-name" class="font-medium text-white"></span></div>
-                </div>
-            </div>
 
-            <div class="bg-gray-800 p-6 rounded-lg">
-                <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-3">Emergency Contact</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 text-sm">
-                    <div><span class="text-gray-400">Full Name:</span> <span id="ec-full-name" class="font-medium text-white"></span></div>
-                    <div><span class="text-gray-400">Nickname:</span> <span id="ec-nickname" class="font-medium text-white"></span></div>
-                    <div><span class="text-gray-400">Contact No:</span> <span id="ec-contact-no" class="font-medium text-white"></span></div>
-                    <div class="md:col-span-3"><span class="text-gray-400">Address:</span> <span id="ec-address" class="font-medium text-white"></span></div>
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-3">Address</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 text-sm">
+                        <div><span class="text-gray-400">Region:</span> <span id="region" class="font-medium text-white"></span></div>
+                        <div><span class="text-gray-400">Province:</span> <span id="province" class="font-medium text-white"></span></div>
+                        <div><span class="text-gray-400">City/Municipality:</span> <span id="city" class="font-medium text-white"></span></div>
+                        <div><span class="text-gray-400">Barangay:</span> <span id="barangay" class="font-medium text-white"></span></div>
+                        <div><span class="text-gray-400">Zip Code:</span> <span id="zip-code" class="font-medium text-white"></span></div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-3">Other Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                        <div><span class="text-gray-400">Occupation:</span> <span id="occupation" class="font-medium text-white"></span></div>
+                        <div><span class="text-gray-400">Skills:</span> <span id="skills" class="font-medium text-white"></span></div>
+                        <div><span class="text-gray-400">Join Date:</span> <span id="join-date" class="font-medium text-white"></span></div>
+                        <div><span class="text-gray-400">Referred By:</span> <span id="referrer-name" class="font-medium text-white"></span></div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-3">Emergency Contact</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 text-sm">
+                        <div><span class="text-gray-400">Full Name:</span> <span id="ec-full-name" class="font-medium text-white"></span></div>
+                        <div><span class="text-gray-400">Nickname:</span> <span id="ec-nickname" class="font-medium text-white"></span></div>
+                        <div><span class="text-gray-400">Contact No:</span> <span id="ec-contact-no" class="font-medium text-white"></span></div>
+                        <div class="md:col-span-3"><span class="text-gray-400">Address:</span> <span id="ec-address" class="font-medium text-white"></span></div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </main>
+        </main>
+    </div>
     
     <script type="module" src="../js/auth.js"></script>
     <script type="module" src="../js/profile.js"></script>
     
     <script>
-        // JavaScript to toggle the sidebar on mobile
-        document.getElementById('menu-btn').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('overlay').style.display = 'block';
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const menuBtn = document.getElementById('menu-btn');
+        
+        menuBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            sidebar.classList.toggle('open');
+            overlay.style.display = 'block';
         });
 
-        document.getElementById('overlay').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.remove('open');
-            document.getElementById('overlay').style.display = 'none';
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            overlay.style.display = 'none';
         });
     </script>
 </body>
