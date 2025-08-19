@@ -43,10 +43,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const dailyRegistrations = usersArray.reduce((acc, user) => {
             const date = user.otherInfo?.joinDate;
             if (date) {
-                // Parse date string to a consistent format (YYYY-MM-DD)
-                const dateParts = date.split('-');
-                const formattedDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]).toISOString().split('T')[0];
-                acc[formattedDate] = (acc[formattedDate] || 0) + 1;
+                // The date format is already YYYY-MM-DD, so we don't need to reformat it.
+                acc[date] = (acc[date] || 0) + 1;
             }
             return acc;
         }, {});
@@ -55,9 +53,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const userData = [];
         
         // Generate labels and data for the last 30 days
+        const today = new Date();
         for (let i = 29; i >= 0; i--) {
             const d = new Date();
-            d.setDate(d.getDate() - i);
+            d.setDate(today.getDate() - i);
             const dateString = d.toISOString().split('T')[0];
             const formattedLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             userLabels.push(formattedLabel);
