@@ -37,6 +37,8 @@ function populateElement(id, value) {
 async function displayUserProfile() {
     const userId = getQueryParam('id');
     const profileContainer = document.getElementById('profile-container');
+    const profileImageDisplay = document.getElementById('profile-image-display');
+    const signatureImageDisplay = document.getElementById('signature-image-display');
     
     if (!userId) {
         profileContainer.innerHTML = '<p class="text-center text-red-400">No user ID provided.</p>';
@@ -50,6 +52,14 @@ async function displayUserProfile() {
         if (userSnapshot.exists()) {
             const userData = userSnapshot.val();
             
+            // NEW: Display uploaded images
+            if (userData.otherInfo.profileImageUrl) {
+                profileImageDisplay.src = userData.otherInfo.profileImageUrl;
+            }
+            if (userData.otherInfo.signatureImageUrl) {
+                signatureImageDisplay.src = userData.otherInfo.signatureImageUrl;
+            }
+
             // Populate Personal Info
             const pi = userData.personalInfo;
             const fullName = `${pi.firstName || ''} ${pi.middleName || ''} ${pi.lastName || ''}`.replace(/\s+/g, ' ').trim();
