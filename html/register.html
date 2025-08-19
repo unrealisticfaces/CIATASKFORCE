@@ -29,7 +29,7 @@
                     <a href="./dashboard.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-home sidebar-icon mr-3"></i> Home</a>
                     <a href="./register.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-white bg-gray-700 rounded-lg"><i class="fas fa-user-plus sidebar-icon mr-3"></i> Register</a>
                     <a href="./accounts.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-users sidebar-icon mr-3"></i> Accounts</a>
-                    <a href="#" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-chart-line sidebar-icon mr-3"></i> Analytics</a>
+                    <a href="./analytics.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-chart-line sidebar-icon mr-3"></i> Analytics</a>
                     <a href="#" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-cog sidebar-icon mr-3"></i> Settings</a>
                 </nav>
             </div>
@@ -104,6 +104,13 @@
                     </div>
 
                     <h3 class="text-lg font-semibold text-white mt-10 mb-6 border-b border-gray-700 pb-3">Address</h3>
+                    
+                    <!-- NEW: Address Line 1 -->
+                    <div class="mb-6">
+                        <label for="address-line-1" class="block text-sm font-medium">Address Line 1</label>
+                        <input type="text" id="address-line-1" placeholder="House No., Street Name, Subdivision" required class="form-input">
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div>
                             <label for="region" class="block text-sm font-medium">Region</label>
@@ -157,7 +164,6 @@
                         </div>
                     </div>
 
-                    <!-- NEW: File Uploads Section -->
                     <h3 class="text-lg font-semibold text-white mt-10 mb-6 border-b border-gray-700 pb-3">File Uploads</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
@@ -252,14 +258,13 @@
         const menuBtn = document.getElementById('menu-btn');
         
         menuBtn.addEventListener('click', (event) => {
-            event.stopPropagation();
-            sidebar.classList.toggle('open');
-            overlay.style.display = 'block';
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').style.display = 'block';
         });
 
-        overlay.addEventListener('click', () => {
-            sidebar.classList.remove('open');
-            overlay.style.display = 'none';
+        document.getElementById('overlay').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').style.display = 'none';
         });
     </script>
 </body>

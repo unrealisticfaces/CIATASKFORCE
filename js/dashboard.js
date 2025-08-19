@@ -21,7 +21,6 @@ const database = getDatabase(app);
 // Wait for the DOM to be fully loaded before running the script
 document.addEventListener('DOMContentLoaded', async () => {
 
-    // --- Fetch User Data and Create Charts ---
     try {
         const usersRef = ref(database, 'users');
         const snapshot = await get(usersRef);
@@ -33,37 +32,50 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Update the main "Users" stat card
+        // --- Get today's date in YYYY-MM-DD format ---
+        const today = new Date();
+        const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+        // --- Calculate Today's Registrations ---
+        const registrationsToday = usersArray.filter(user => user.otherInfo?.joinDate === todayString).length;
+        
+        // --- Update Stat Cards ---
         const totalUsersStat = document.getElementById('total-users-stat');
+        const registrationsTodayStat = document.getElementById('registrations-today-stat');
+
         if (totalUsersStat) {
             totalUsersStat.textContent = usersArray.length.toLocaleString();
         }
+        if (registrationsTodayStat) {
+            // Display today's count in the "Registration Chart" card
+            registrationsTodayStat.textContent = `${registrationsToday.toLocaleString()} today`;
+        }
 
-        // Process data for DAILY USERS chart
+        // --- Process data for DAILY REGISTRATIONS chart ---
         const dailyRegistrations = usersArray.reduce((acc, user) => {
             const date = user.otherInfo?.joinDate;
             if (date) {
-                // The date format is already YYYY-MM-DD, so we don't need to reformat it.
                 acc[date] = (acc[date] || 0) + 1;
             }
             return acc;
         }, {});
 
-        const userLabels = [];
-        const userData = [];
+        const registrationLabels = [];
+        const registrationData = [];
         
-        // Generate labels and data for the last 30 days
-        const today = new Date();
         for (let i = 29; i >= 0; i--) {
             const d = new Date();
             d.setDate(today.getDate() - i);
-            const dateString = d.toISOString().split('T')[0];
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const dateString = `${year}-${month}-${day}`;
             const formattedLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            userLabels.push(formattedLabel);
-            userData.push(dailyRegistrations[dateString] || 0);
+            registrationLabels.push(formattedLabel);
+            registrationData.push(dailyRegistrations[dateString] || 0);
         }
         
-        createInteractiveUsersChart('usersChart', userLabels, userData, '#22c55e');
+        createInteractiveChart('registrationsChart', registrationLabels, registrationData, '#22c55e');
 
         // --- Process data for SESSIONS (Referral vs Direct) chart ---
         initializeSessionsChart(usersArray);
@@ -78,7 +90,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         createRegionChart(regionCounts, usersArray.length);
 
         // --- Initialize other static charts ---
-        createMiniChart('conversionsChart', [80, 75, 60, 65, 50, 45, 40, 35, 30, 25], '#ef4444');
         initializeMonthlySessionsChart(usersArray);
 
     } catch (error) {
@@ -89,17 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // --- Chart Creation Functions ---
 
-function createMiniChart(canvasId, data, color) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const gradient = ctx.createLinearGradient(0, 0, 0, 60);
-    gradient.addColorStop(0, `${color}4D`);
-    gradient.addColorStop(1, `${color}00`);
-    new Chart(ctx, { type: 'line', data: { labels: Array(data.length).fill(''), datasets: [{ data: data, borderColor: color, borderWidth: 2, fill: true, backgroundColor: gradient, tension: 0.4, pointRadius: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } } } });
-}
-
-function createInteractiveUsersChart(canvasId, labels, data, color) {
+function createInteractiveChart(canvasId, labels, data, color) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -135,11 +136,10 @@ function createInteractiveUsersChart(canvasId, labels, data, color) {
                     displayColors: false,
                     callbacks: {
                         title: function(tooltipItems) {
-                            const date = new Date(tooltipItems[0].label);
-                            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                            return tooltipItems[0].label;
                         },
                         label: function(tooltipItem) {
-                            return `Users: ${tooltipItem.raw}`;
+                            return `Registrations: ${tooltipItem.raw}`;
                         }
                     }
                 }
@@ -154,14 +154,12 @@ function initializeSessionsChart(usersArray) {
     const sessionsCanvas = document.getElementById('sessionsChart');
     if (!sessionsCanvas) return;
 
-    // 1. Get daily counts from the raw user data
     const directCounts = {};
     const referralCounts = {};
     usersArray.forEach(user => {
         const date = user.otherInfo?.joinDate;
         if (!date) return;
 
-        // Correctly check if the referrerName exists and is not an empty string
         if (user.otherInfo.referrerName && user.otherInfo.referrerName.trim() !== '') {
             referralCounts[date] = (referralCounts[date] || 0) + 1;
         } else {
@@ -169,14 +167,12 @@ function initializeSessionsChart(usersArray) {
         }
     });
 
-    // 2. Aggregate daily counts into 5-day buckets
     const labels = [];
     const directData = [];
     const referralData = [];
     const bucketSize = 5;
-    const numberOfBuckets = 6; // 6 buckets of 5 days = 30 days total
+    const numberOfBuckets = 6;
 
-    // Generate labels for the last 30 days
     const today = new Date();
     for (let i = numberOfBuckets - 1; i >= 0; i--) {
         const startDate = new Date(today);
@@ -190,7 +186,10 @@ function initializeSessionsChart(usersArray) {
         for (let j = 0; j < bucketSize; j++) {
             const dayToSum = new Date(startDate);
             dayToSum.setDate(startDate.getDate() + j);
-            const dateString = dayToSum.toISOString().split('T')[0];
+            const year = dayToSum.getFullYear();
+            const month = String(dayToSum.getMonth() + 1).padStart(2, '0');
+            const day = String(dayToSum.getDate()).padStart(2, '0');
+            const dateString = `${year}-${month}-${day}`;
 
             directSum += (directCounts[dateString] || 0);
             referralSum += (referralCounts[dateString] || 0);
@@ -200,7 +199,6 @@ function initializeSessionsChart(usersArray) {
         referralData.push(referralSum);
     }
 
-    // 3. Create the chart
     const sessionsCtx = sessionsCanvas.getContext('2d');
     new Chart(sessionsCtx, {
         type: 'line',
@@ -234,10 +232,7 @@ function initializeSessionsChart(usersArray) {
                     stacked: true,
                     beginAtZero: true,
                     grid: { color: '#374151' },
-                    ticks: {
-                        color: '#9ca3af',
-                        precision: 0
-                    }
+                    ticks: { color: '#9ca3af', precision: 0 }
                 },
                 x: {
                     grid: { color: '#374151' },
@@ -259,7 +254,6 @@ function initializeMonthlySessionsChart(usersArray) {
     const pageViewsCanvas = document.getElementById('pageViewsChart');
     if (!pageViewsCanvas) return;
 
-    // 1. Aggregate data by month
     const monthlyData = usersArray.reduce((acc, user) => {
         const joinDate = user.otherInfo?.joinDate;
         if (joinDate) {
@@ -277,10 +271,7 @@ function initializeMonthlySessionsChart(usersArray) {
         return acc;
     }, {});
 
-    // 2. Sort months chronologically
     const sortedMonths = Object.keys(monthlyData).sort();
-
-    // 3. Prepare labels and data for the chart
     const labels = sortedMonths.map(yearMonth => {
         const [year, month] = yearMonth.split('-');
         return new Date(year, month - 1).toLocaleString('en-US', { month: 'short' });
@@ -384,6 +375,7 @@ function createRegionChart(regionData, totalUsers) {
     });
 
     const legendContainer = document.getElementById('regionChartLegend');
+    if (!legendContainer) return;
     legendContainer.innerHTML = '';
     const colors = ['bg-blue-500', 'bg-blue-800', 'bg-blue-400', 'bg-blue-300', 'bg-purple-400'];
 

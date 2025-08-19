@@ -29,7 +29,7 @@
                     <a href="./dashboard.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-home sidebar-icon mr-3"></i> Home</a>
                     <a href="./register.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-user-plus sidebar-icon mr-3"></i> Register</a>
                     <a href="./accounts.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-white bg-gray-700 rounded-lg"><i class="fas fa-users sidebar-icon mr-3"></i> Accounts</a>
-                    <a href="#" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-chart-line sidebar-icon mr-3"></i> Analytics</a>
+                    <a href="./analytics.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-chart-line sidebar-icon mr-3"></i> Analytics</a>
                     <a href="#" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-cog sidebar-icon mr-3"></i> Settings</a>
                 </nav>
             </div>
@@ -58,7 +58,6 @@
             </header>
 
             <div id="profile-container" class="mt-6 space-y-8">
-                <!-- NEW: Profile Images Section -->
                 <div class="bg-gray-800 p-6 rounded-lg">
                     <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-3">User Images</h3>
                     <div class="flex items-center space-x-6">
@@ -88,6 +87,9 @@
                 <div class="bg-gray-800 p-6 rounded-lg">
                     <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-3">Address</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 text-sm">
+                        <!-- ADDED THIS DIV -->
+                        <div class="md:col-span-3"><span class="text-gray-400">Address Line 1:</span> <span id="address-line-1" class="font-medium text-white"></span></div>
+
                         <div><span class="text-gray-400">Region:</span> <span id="region" class="font-medium text-white"></span></div>
                         <div><span class="text-gray-400">Province:</span> <span id="province" class="font-medium text-white"></span></div>
                         <div><span class="text-gray-400">City/Municipality:</span> <span id="city" class="font-medium text-white"></span></div>

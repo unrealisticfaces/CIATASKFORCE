@@ -52,7 +52,6 @@ async function displayUserProfile() {
         if (userSnapshot.exists()) {
             const userData = userSnapshot.val();
             
-            // NEW: Display uploaded images
             if (userData.otherInfo.profileImageUrl) {
                 profileImageDisplay.src = userData.otherInfo.profileImageUrl;
             }
@@ -72,6 +71,7 @@ async function displayUserProfile() {
 
             // Populate Address
             const addr = userData.address;
+            populateElement('address-line-1', addr.addressLine1); // <-- ADDED THIS LINE
             populateElement('region', addr.region);
             populateElement('province', addr.province);
             populateElement('city', addr.city);
