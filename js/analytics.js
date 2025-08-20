@@ -18,75 +18,65 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-// --- Main function to build and render the genealogy tree ---
-async function buildGenealogyTree() {
-    const container = document.getElementById('genealogy-container');
-    if (!container) return;
+// Global variable to hold all user data for searching
+let allUsersById = new Map();
 
+// --- Fetch all user data once when the page loads ---
+async function fetchAllUsers() {
     try {
         const usersRef = ref(database, 'users');
         const snapshot = await get(usersRef);
 
-        if (!snapshot.exists()) {
-            container.innerHTML = '<p class="text-gray-400">No user data found to build the tree.</p>';
-            return;
-        }
-
-        const usersData = snapshot.val();
-        const users = Object.values(usersData);
-        
-        // A map to hold all users by their full name for easy lookup.
-        // NOTE: This assumes names are unique. A more robust solution for the future
-        // would be to save the referrer's ID instead of their name.
-        const usersByName = new Map();
-        users.forEach(user => {
-            const fullName = `${user.personalInfo.firstName || ''} ${user.personalInfo.lastName || ''}`.trim();
-            if (fullName) {
-                usersByName.set(fullName, { ...user, children: [] });
-            }
-        });
-
-        // A list of root nodes (users who were not referred by anyone in the system).
-        const rootNodes = [];
-
-        // Build the tree structure.
-        usersByName.forEach(user => {
-            const referrerName = user.otherInfo?.referrerName?.trim();
-            if (referrerName && usersByName.has(referrerName)) {
-                // If the user has a valid referrer, add them as a child to that referrer.
-                usersByName.get(referrerName).children.push(user);
-            } else {
-                // Otherwise, they are a root node.
-                rootNodes.push(user);
-            }
-        });
-        
-        // Clear the loading message and render the tree.
-        container.innerHTML = '';
-        if (rootNodes.length > 0) {
-            const treeRootUl = document.createElement('ul');
-            rootNodes.forEach(node => {
-                treeRootUl.appendChild(createNodeElement(node));
+        if (snapshot.exists()) {
+            const usersData = snapshot.val();
+            Object.values(usersData).forEach(user => {
+                allUsersById.set(user.personalInfo.id, { ...user, children: [] });
             });
-            container.appendChild(treeRootUl);
-        } else {
-            container.innerHTML = '<p class="text-gray-400">Could not determine root nodes for the tree.</p>';
         }
-
     } catch (error) {
-        console.error("Failed to build genealogy tree:", error);
-        container.innerHTML = '<p class="text-red-500">An error occurred while loading the data.</p>';
+        console.error("Failed to fetch user data:", error);
     }
 }
 
-// --- Recursive function to create each node in the tree ---
+// --- Main function to build and render a specific user's tree ---
+function buildGenealogyTree(startUserId) {
+    const container = document.getElementById('genealogy-container');
+    container.innerHTML = ''; // Clear previous results
+
+    if (!allUsersById.has(startUserId)) {
+        container.innerHTML = `<p class="text-yellow-400">User ID "${startUserId}" not found.</p>`;
+        return;
+    }
+
+    // Reset children arrays before rebuilding
+    allUsersById.forEach(user => user.children = []);
+
+    // Build the full tree structure in memory
+    allUsersById.forEach(user => {
+        const referrerId = user.otherInfo?.referrerId?.trim();
+        if (referrerId && allUsersById.has(referrerId)) {
+            allUsersById.get(referrerId).children.push(user);
+        }
+    });
+
+    const rootUser = allUsersById.get(startUserId);
+
+    if (rootUser.children.length === 0) {
+        container.innerHTML = `<p class="text-gray-400">User "${rootUser.personalInfo.firstName} ${rootUser.personalInfo.lastName}" has not referred anyone.</p>`;
+        return;
+    }
+
+    const treeRootUl = document.createElement('ul');
+    treeRootUl.appendChild(createNodeElement(rootUser));
+    container.appendChild(treeRootUl);
+}
+
+// --- Recursive function to create each node element ---
 function createNodeElement(user) {
     const li = document.createElement('li');
-    
     const fullName = `${user.personalInfo.firstName || ''} ${user.personalInfo.lastName || ''}`.trim();
     const userId = user.personalInfo.id;
 
-    // Create the clickable node element.
     const nodeLink = document.createElement('a');
     nodeLink.href = `./profile.html?id=${userId}`;
     nodeLink.innerHTML = `
@@ -95,7 +85,6 @@ function createNodeElement(user) {
     `;
     li.appendChild(nodeLink);
 
-    // If the user has children, create a new list and recursively add them.
     if (user.children && user.children.length > 0) {
         const childrenUl = document.createElement('ul');
         user.children.forEach(child => {
@@ -103,8 +92,22 @@ function createNodeElement(user) {
         });
         li.appendChild(childrenUl);
     }
-
     return li;
 }
 
-document.addEventListener('DOMContentLoaded', buildGenealogyTree);
+// --- Event Listeners ---
+document.addEventListener('DOMContentLoaded', () => {
+    // Fetch all users as soon as the page loads
+    fetchAllUsers();
+
+    const searchForm = document.getElementById('genealogy-search-form');
+    const searchInput = document.getElementById('search-id-input');
+
+    searchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const searchId = searchInput.value.trim();
+        if (searchId) {
+            buildGenealogyTree(searchId);
+        }
+    });
+});

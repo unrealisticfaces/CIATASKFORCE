@@ -33,7 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
-            // Redirect to the index page for logout
+            // --- THIS IS THE UPDATED LOGOUT LOGIC ---
+            // 1. Remove the login flag from sessionStorage.
+            sessionStorage.removeItem('isLoggedIn');
+            
+            // 2. Redirect to the login page.
             window.location.href = '../index.html'; 
         });
     }

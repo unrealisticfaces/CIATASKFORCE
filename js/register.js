@@ -34,6 +34,7 @@ const messageDiv = document.getElementById('form-message');
 const regionSelect = document.getElementById('region');
 const provinceSelect = document.getElementById('province');
 const citySelect = document.getElementById('city');
+const barangaySelect = document.getElementById('barangay');
 const profileImageInput = document.getElementById('profile-image');
 const signatureImageInput = document.getElementById('signature-image');
 
@@ -42,37 +43,16 @@ let ncrCitiesData = null;
 
 // --- Supabase Upload Helper Function ---
 async function uploadImageToSupabase(file, bucketName, userId, imageType) {
-    if (!file) {
-        console.warn(`No file selected for ${imageType} upload.`);
-        return null;
-    }
-
+    if (!file) return null;
     const filePath = `${userId}/${imageType}-${Date.now()}.${file.name.split('.').pop()}`;
-
     try {
-        const { error: signInError } = await supabase.auth.signInAnonymously();
-        if (signInError) {
-            console.error("Supabase anonymous sign-in failed:", signInError);
-            return null;
-        }
-        
-        const { data, error } = await supabase.storage.from(bucketName).upload(filePath, file);
-
-        if (error) {
-            console.error(`Error uploading ${imageType} image:`, error);
-            return null;
-        }
-
-        const { data: { publicUrl }, error: publicUrlError } = supabase.storage.from(bucketName).getPublicUrl(filePath);
-        
-        if (publicUrlError) {
-            console.error(`Error getting public URL for ${imageType} image:`, publicUrlError);
-            return null;
-        }
-
-        return publicUrl;
+        await supabase.auth.signInAnonymously();
+        const { error } = await supabase.storage.from(bucketName).upload(filePath, file);
+        if (error) throw error;
+        const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+        return data.publicUrl;
     } catch (error) {
-        console.error(`Unexpected error during ${imageType} image upload:`, error);
+        console.error(`Error uploading ${imageType} image:`, error);
         return null;
     }
 }
@@ -90,26 +70,17 @@ async function fetchNcrCities() {
 async function populateDropdown(selectElement, dataSource, nameProperty) {
     selectElement.innerHTML = `<option value="" disabled selected>Loading...</option>`;
     try {
-        let data;
-        if (typeof dataSource === 'string') {
-            const response = await fetch(dataSource);
-            if (!response.ok) throw new Error('Network response was not ok');
-            data = await response.json();
-        } else {
-            data = dataSource;
-        }
-
-        if (nameProperty) {
-            data.sort((a, b) => a.name.localeCompare(b.name));
-            selectElement.innerHTML = `<option value="" disabled selected>Select ${selectElement.previousElementSibling.textContent}</option>`;
-            data.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item.code;
-                option.textContent = item[nameProperty];
-                selectElement.appendChild(option);
-            });
-        }
-        
+        const response = await fetch(dataSource);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        data.sort((a, b) => a.name.localeCompare(b.name));
+        selectElement.innerHTML = `<option value="" disabled selected>Select ${selectElement.previousElementSibling.textContent}</option>`;
+        data.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.code;
+            option.textContent = item[nameProperty];
+            selectElement.appendChild(option);
+        });
         selectElement.disabled = false;
     } catch (error) {
         console.error(`Failed to fetch ${selectElement.id}:`, error);
@@ -119,84 +90,50 @@ async function populateDropdown(selectElement, dataSource, nameProperty) {
 
 function resetDropdowns(...dropdowns) {
     dropdowns.forEach(dd => {
-        if (dd && dd.tagName === 'SELECT') {
-            const label = dd.previousElementSibling.textContent;
-            dd.innerHTML = `<option value="" disabled selected>Select ${label}</option>`;
-            dd.disabled = true;
-        }
+        const label = dd.previousElementSibling.textContent;
+        dd.innerHTML = `<option value="" disabled selected>Select ${label}</option>`;
+        dd.disabled = true;
     });
 }
 
 // --- Event Listeners ---
 regionSelect.addEventListener('change', async () => {
-    const barangayElement = document.getElementById('barangay');
-    resetDropdowns(provinceSelect, citySelect, barangayElement);
-
+    resetDropdowns(provinceSelect, citySelect, barangaySelect);
     const NCR_CODE = '130000000';
-
     if (regionSelect.value === NCR_CODE) {
         provinceSelect.disabled = true;
         provinceSelect.innerHTML = `<option value="N/A" selected>N/A</option>`;
-        
         const ncrCities = await fetchNcrCities();
-        await populateDropdown(citySelect, ncrCities, 'name');
-        
+        citySelect.innerHTML = `<option value="" disabled selected>Select City / Municipality</option>`;
+        ncrCities.sort((a,b) => a.name.localeCompare(b.name)).forEach(city => {
+             const option = document.createElement('option');
+             option.value = city.code;
+             option.textContent = city.name;
+             citySelect.appendChild(option);
+        });
         citySelect.disabled = false;
+        barangaySelect.innerHTML = `<option value="" disabled selected>Use Address Line 1</option>`;
+
     } else if (regionSelect.value) {
+        provinceSelect.disabled = false;
         await populateDropdown(provinceSelect, `${PSGC_API_BASE}/regions/${regionSelect.value}/provinces/`, 'name');
     }
 });
 
 provinceSelect.addEventListener('change', () => {
-    const barangayElement = document.getElementById('barangay');
-    resetDropdowns(citySelect, barangayElement);
+    resetDropdowns(citySelect, barangaySelect);
     if (provinceSelect.value) {
         populateDropdown(citySelect, `${PSGC_API_BASE}/provinces/${provinceSelect.value}/cities-municipalities/`, 'name');
     }
 });
 
-citySelect.addEventListener('change', async () => {
-    const selectedRegionName = regionSelect.options[regionSelect.selectedIndex].textContent;
-    const selectedCityCode = citySelect.value;
-    
-    const barangayContainer = document.getElementById('barangay').parentNode;
-
-    if (selectedRegionName === 'National Capital Region (NCR)') {
-        const barangayInput = document.createElement('input');
-        barangayInput.type = 'text';
-        barangayInput.id = 'barangay';
-        barangayInput.className = 'form-input';
-        barangayInput.placeholder = 'Enter Barangay';
-        barangayInput.required = true;
-
-        barangayContainer.innerHTML = '';
-        
-        const label = document.createElement('label');
-        label.htmlFor = 'barangay';
-        label.className = 'block text-sm font-medium';
-        label.textContent = 'Barangay';
-        barangayContainer.appendChild(label);
-        
-        barangayContainer.appendChild(barangayInput);
-
-    } else if (selectedCityCode) {
-        const barangaySelect = document.createElement('select');
-        barangaySelect.id = 'barangay';
-        barangaySelect.className = 'form-input';
-        barangaySelect.required = true;
-        barangaySelect.disabled = true;
-        
-        barangayContainer.innerHTML = '';
-        
-        const label = document.createElement('label');
-        label.htmlFor = 'barangay';
-        label.className = 'block text-sm font-medium';
-        label.textContent = 'Barangay';
-        barangayContainer.appendChild(label);
-
-        barangayContainer.appendChild(barangaySelect);
-        
-        populateDropdown(barangaySelect, `${PSGC_API_BASE}/cities-municipalities/${selectedCityCode}/barangays/`, 'name');
+citySelect.addEventListener('change', () => {
+    resetDropdowns(barangaySelect);
+    if (citySelect.value) {
+        const selectedRegionName = regionSelect.options[regionSelect.selectedIndex].textContent;
+        if (selectedRegionName !== 'National Capital Region (NCR)') {
+            populateDropdown(barangaySelect, `${PSGC_API_BASE}/cities-municipalities/${citySelect.value}/barangays/`, 'name');
+        }
     }
 });
 
@@ -207,25 +144,17 @@ form.addEventListener('submit', async (e) => {
 
     const newId = idInput.value;
     if (!newId || newId === "Generating..." || newId === "Error") {
-        messageDiv.textContent = 'Error: ID not generated. Cannot submit.';
-        messageDiv.className = 'text-center mt-4 text-red-500 font-semibold';
+        messageDiv.textContent = 'Error: ID not generated.';
+        messageDiv.className = 'text-center mt-4 text-red-500';
         return;
     }
 
-    const profileImageFile = profileImageInput.files[0];
-    const signatureImageFile = signatureImageInput.files[0];
-    
     const [profileImageUrl, signatureImageUrl] = await Promise.all([
-        uploadImageToSupabase(profileImageFile, 'profile-images', newId, 'profile'),
-        uploadImageToSupabase(signatureImageFile, 'signatures', newId, 'signature')
+        uploadImageToSupabase(profileImageInput.files[0], 'profile-images', newId, 'profile'),
+        uploadImageToSupabase(signatureImageInput.files[0], 'signatures', newId, 'signature')
     ]);
     
-    const getSelectedText = (el) => el.options[el.selectedIndex]?.textContent || '';
-
-    const barangayElement = document.getElementById('barangay');
-    const barangayValue = (barangayElement.tagName === 'SELECT') 
-        ? getSelectedText(barangayElement) 
-        : barangayElement.value;
+    const getSelectedText = (el) => (el.selectedIndex > 0) ? el.options[el.selectedIndex].textContent : '';
 
     const userData = {
         personalInfo: {
@@ -240,17 +169,18 @@ form.addEventListener('submit', async (e) => {
             bloodType: document.getElementById('blood-type').value,
         },
         address: {
+            addressLine1: document.getElementById('address-line-1').value,
             region: getSelectedText(regionSelect),
             province: getSelectedText(provinceSelect),
             city: getSelectedText(citySelect),
-            barangay: barangayValue,
+            barangay: getSelectedText(barangaySelect),
             zipCode: document.getElementById('zip-code').value,
         },
         otherInfo: {
             occupation: document.getElementById('occupation').value,
             skills: document.getElementById('skills').value,
             joinDate: document.getElementById('join-date').value,
-            referrerName: document.getElementById('referrer-name').value,
+            referrerId: document.getElementById('referrer-id').value.trim(),
             profileImageUrl: profileImageUrl || '',
             signatureImageUrl: signatureImageUrl || '',
         },
@@ -267,31 +197,14 @@ form.addEventListener('submit', async (e) => {
     try {
         await set(child(usersRef, newId), userData);
         messageDiv.textContent = 'User registered successfully!';
-        messageDiv.className = 'text-center mt-4 text-green-500 font-semibold';
+        messageDiv.className = 'text-center mt-4 text-green-500';
         form.reset();
-        
-        const barangayContainer = document.getElementById('barangay').parentNode;
-        const newBarangaySelect = document.createElement('select');
-        newBarangaySelect.id = 'barangay';
-        newBarangaySelect.className = 'form-input';
-        newBarangaySelect.required = true;
-        newBarangaySelect.disabled = true;
-        newBarangaySelect.innerHTML = `<option value="" disabled selected>Select Barangay</option>`;
-        
-        barangayContainer.innerHTML = '';
-        const label = document.createElement('label');
-        label.htmlFor = 'barangay';
-        label.className = 'block text-sm font-medium';
-        label.textContent = 'Barangay';
-        barangayContainer.appendChild(label);
-        barangayContainer.appendChild(newBarangaySelect);
-
-        resetDropdowns(provinceSelect, citySelect);
+        resetDropdowns(provinceSelect, citySelect, barangaySelect);
         initializePage(); 
     } catch (error) {
         console.error("Firebase write failed: ", error);
-        messageDiv.textContent = 'An error occurred during submission. Please check console.';
-        messageDiv.className = 'text-center mt-4 text-red-500 font-semibold';
+        messageDiv.textContent = 'Submission error. See console.';
+        messageDiv.className = 'text-center mt-4 text-red-500';
     }
 });
 
@@ -300,17 +213,12 @@ async function initializePage() {
     idInput.value = 'Generating...';
     try {
         const snapshot = await get(usersRef);
-        let userCount = 0;
-        if (snapshot.exists()) {
-            userCount = Object.keys(snapshot.val()).length;
-        }
-        const newId = `100-${101 + userCount}`;
-        idInput.value = newId;
+        const userCount = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+        idInput.value = `100-${101 + userCount}`;
     } catch(error) {
-        console.error("Could not fetch user count from Firebase:", error);
+        console.error("Could not fetch user count:", error);
         idInput.value = "Error";
     }
-
     populateDropdown(regionSelect, `${PSGC_API_BASE}/regions/`, 'name');
 }
 

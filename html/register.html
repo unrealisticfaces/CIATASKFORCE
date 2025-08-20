@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Dashboard</title>
+    <script type="module" src="../js/auth-guard.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -105,7 +106,6 @@
 
                     <h3 class="text-lg font-semibold text-white mt-10 mb-6 border-b border-gray-700 pb-3">Address</h3>
                     
-                    <!-- NEW: Address Line 1 -->
                     <div class="mb-6">
                         <label for="address-line-1" class="block text-sm font-medium">Address Line 1</label>
                         <input type="text" id="address-line-1" placeholder="House No., Street Name, Subdivision" required class="form-input">
@@ -159,8 +159,8 @@
                             <input type="date" id="join-date" class="form-input">
                         </div>
                         <div>
-                            <label for="referrer-name" class="block text-sm font-medium">Referrer's Name</label>
-                            <input type="text" id="referrer-name" class="form-input" placeholder="Leave blank if direct">
+                            <label for="referrer-id" class="block text-sm font-medium">Referrer's ID</label>
+                            <input type="text" id="referrer-id" class="form-input" placeholder="Leave blank if direct">
                         </div>
                     </div>
 
@@ -237,7 +237,6 @@
             color: #9ca3af; /* text-gray-400 */
         }
         
-        /* Custom styling for dropdowns to fix UI issues */
         select.form-input {
             -webkit-appearance: none;
             appearance: none;

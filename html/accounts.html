@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accounts - Dashboard</title>
+    <script type="module" src="../js/auth-guard.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,7 +56,17 @@
             </div>
         </header>
 
-        <div class="mt-6 bg-gray-800 rounded-lg overflow-hidden">
+        <!-- CORRECTED SEARCH BAR -->
+        <div class="mt-6 mb-4">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400"></i>
+                </div>
+                <input type="text" id="search-input" class="w-full md:w-1/3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 pl-10 pr-4 py-2" placeholder="Search by name or ID...">
+            </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left text-gray-300">
                     <thead class="text-xs text-gray-400 uppercase bg-gray-900">
@@ -77,12 +88,10 @@
         </div>
     </main>
     
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="../js/auth.js"></script>
     <script type="module" src="../js/accounts.js"></script>
     
     <script>
-        // JavaScript to toggle the sidebar on mobile
         document.getElementById('menu-btn').addEventListener('click', () => {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('overlay').style.display = 'block';

@@ -19,40 +19,52 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const usersRef = ref(database, 'users');
 
-// Function to fetch and display users
+// Store all users fetched from Firebase to enable client-side search
+let allUsers = [];
+
+// NEW: Function to render a given list of users into the table
+function renderUsers(usersToDisplay) {
+    const tableBody = document.getElementById('users-table-body');
+    tableBody.innerHTML = ''; // Clear the table first
+
+    if (usersToDisplay.length === 0) {
+        tableBody.innerHTML = '<tr class="border-b border-gray-700"><td colspan="7" class="text-center px-6 py-12 text-gray-400">No users match your search.</td></tr>';
+        return;
+    }
+
+    usersToDisplay.forEach(userData => {
+        const userId = userData.personalInfo.id;
+        const fullName = `${userData.personalInfo.firstName || ''} ${userData.personalInfo.lastName || ''}`.trim();
+        
+        const row = document.createElement('tr');
+        row.className = 'border-b border-gray-700 hover:bg-gray-700/50';
+        
+        row.innerHTML = `
+            <td class="p-4"><input type="checkbox" class="bg-gray-700 border-gray-600 rounded"></td>
+            <td class="px-6 py-4 font-medium text-white">${userId}</td>
+            <td class="px-6 py-4">${fullName}</td>
+            <td class="px-6 py-4">${userData.personalInfo.contactNo || 'N/A'}</td>
+            <td class="px-6 py-4">${userData.otherInfo.joinDate || 'N/A'}</td>
+            <td class="px-6 py-4">
+                <span class="flex items-center text-sm font-medium"><span class="flex w-2.5 h-2.5 bg-green-500 rounded-full mr-2"></span> Active</span>
+            </td>
+            <td class="px-6 py-4">
+                <a href="./profile.html?id=${userId}" class="font-medium text-blue-500 hover:underline">View</a>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+// MODIFIED: This function now fetches all users and calls the render function
 async function displayUsers() {
     const tableBody = document.getElementById('users-table-body');
     try {
         const snapshot = await get(usersRef);
         if (snapshot.exists()) {
-            tableBody.innerHTML = ''; // Clear the "Loading..." message
-            snapshot.forEach(childSnapshot => {
-                const userId = childSnapshot.key;
-                const userData = childSnapshot.val();
-                
-                // Combine first and last name
-                const fullName = `${userData.personalInfo.firstName || ''} ${userData.personalInfo.lastName || ''}`.trim();
-                
-                const row = document.createElement('tr');
-                row.className = 'border-b border-gray-700 hover:bg-gray-700/50';
-                
-                // **THIS IS THE UPDATED PART**
-                // The href attribute now correctly links to the profile page with the user's ID
-                row.innerHTML = `
-                    <td class="p-4"><input type="checkbox" class="bg-gray-700 border-gray-600 rounded"></td>
-                    <td class="px-6 py-4 font-medium text-white">${userId}</td>
-                    <td class="px-6 py-4">${fullName}</td>
-                    <td class="px-6 py-4">${userData.personalInfo.contactNo || 'N/A'}</td>
-                    <td class="px-6 py-4">${userData.otherInfo.joinDate || 'N/A'}</td>
-                    <td class="px-6 py-4">
-                        <span class="flex items-center text-sm font-medium"><span class="flex w-2.5 h-2.5 bg-green-500 rounded-full mr-2"></span> Active</span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <a href="./profile.html?id=${userId}" class="font-medium text-blue-500 hover:underline">View</a>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
+            // Convert snapshot to array and store it
+            allUsers = Object.values(snapshot.val());
+            renderUsers(allUsers); // Render all users initially
         } else {
             tableBody.innerHTML = '<tr class="border-b border-gray-700"><td colspan="7" class="text-center px-6 py-12 text-gray-400">No users found in the database.</td></tr>';
         }
@@ -62,5 +74,21 @@ async function displayUsers() {
     }
 }
 
-// Run the function when the DOM is loaded
-document.addEventListener('DOMContentLoaded', displayUsers);
+// MODIFIED: Event listener now also sets up the search functionality
+document.addEventListener('DOMContentLoaded', () => {
+    displayUsers();
+
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        
+        const filteredUsers = allUsers.filter(user => {
+            const fullName = `${user.personalInfo.firstName || ''} ${user.personalInfo.lastName || ''}`.toLowerCase();
+            const userId = user.personalInfo.id.toLowerCase();
+            
+            return fullName.includes(searchTerm) || userId.includes(searchTerm);
+        });
+        
+        renderUsers(filteredUsers);
+    });
+});

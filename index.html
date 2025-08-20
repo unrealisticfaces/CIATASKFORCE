@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login</title>
+    <title>CIA TASK FORCE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +17,11 @@
 
     <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
         <div class="text-center">
-            <h1 class="text-3xl font-bold text-gray-800">Admin Login</h1>
+            <!-- ADDED IMAGE HERE -->
+            <img src="./js/data/indexwall.png" alt="CIA Task Force Logo" class="w-24 h-24 mx-auto mb-4 rounded-full">
+            
+            <!-- CHANGED TEXT HERE -->
+            <h1 class="text-3xl font-bold text-gray-800">CIA TASK FORCE</h1>
             <p class="text-gray-500">Please sign in to continue</p>
         </div>
 
@@ -30,7 +34,7 @@
                 <label for="password" class="text-sm font-medium text-gray-700">Password</label>
                 <input id="password" name="password" type="password" required class="w-full px-4 py-2 mt-2 text-base text-gray-700 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your password">
                 <span id="togglePassword" class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer" style="top: 28px;">
-                     <i class="fa-solid fa-eye text-gray-400"></i>
+                    <i class="fa-solid fa-eye text-gray-400"></i>
                 </span>
             </div>
             <div>
@@ -46,7 +50,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
           apiKey: "AIzaSyDA_q4-NEMJij-ojfQIahQRFov1n6p7qNM",
           authDomain: "cia-bayanihan-app.firebaseapp.com",
@@ -89,6 +92,7 @@
                     if (adminData.username === username && adminData.password === password) {
                         messageDiv.textContent = 'Login successful! Redirecting...';
                         messageDiv.className = 'text-center text-sm text-green-600 font-semibold';
+                        sessionStorage.setItem('isLoggedIn', 'true');
                         setTimeout(() => {
                             window.location.href = './html/dashboard.html';
                         }, 1500);

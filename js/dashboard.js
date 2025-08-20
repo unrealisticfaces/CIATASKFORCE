@@ -32,14 +32,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // --- Get today's date in YYYY-MM-DD format ---
         const today = new Date();
         const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-        // --- Calculate Today's Registrations ---
         const registrationsToday = usersArray.filter(user => user.otherInfo?.joinDate === todayString).length;
         
-        // --- Update Stat Cards ---
         const totalUsersStat = document.getElementById('total-users-stat');
         const registrationsTodayStat = document.getElementById('registrations-today-stat');
 
@@ -47,11 +44,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             totalUsersStat.textContent = usersArray.length.toLocaleString();
         }
         if (registrationsTodayStat) {
-            // Display today's count in the "Registration Chart" card
             registrationsTodayStat.textContent = `${registrationsToday.toLocaleString()} today`;
         }
 
-        // --- Process data for DAILY REGISTRATIONS chart ---
         const dailyRegistrations = usersArray.reduce((acc, user) => {
             const date = user.otherInfo?.joinDate;
             if (date) {
@@ -76,11 +71,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         
         createInteractiveChart('registrationsChart', registrationLabels, registrationData, '#22c55e');
-
-        // --- Process data for SESSIONS (Referral vs Direct) chart ---
         initializeSessionsChart(usersArray);
 
-        // --- Process data for REGION chart ---
         const regionCounts = usersArray.reduce((acc, user) => {
             const region = user.address?.region || 'Unknown';
             acc[region] = (acc[region] || 0) + 1;
@@ -88,8 +80,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, {});
 
         createRegionChart(regionCounts, usersArray.length);
-
-        // --- Initialize other static charts ---
         initializeMonthlySessionsChart(usersArray);
 
     } catch (error) {
@@ -160,7 +150,9 @@ function initializeSessionsChart(usersArray) {
         const date = user.otherInfo?.joinDate;
         if (!date) return;
 
-        if (user.otherInfo.referrerName && user.otherInfo.referrerName.trim() !== '') {
+        // --- THIS IS THE FIX ---
+        // Changed from referrerName to referrerId
+        if (user.otherInfo.referrerId && user.otherInfo.referrerId.trim() !== '') {
             referralCounts[date] = (referralCounts[date] || 0) + 1;
         } else {
             directCounts[date] = (directCounts[date] || 0) + 1;
@@ -262,7 +254,9 @@ function initializeMonthlySessionsChart(usersArray) {
             if (!acc[yearMonth]) {
                 acc[yearMonth] = { direct: 0, referral: 0 };
             }
-            if (user.otherInfo.referrerName && user.otherInfo.referrerName.trim() !== '') {
+            // --- THIS IS THE FIX ---
+            // Changed from referrerName to referrerId
+            if (user.otherInfo.referrerId && user.otherInfo.referrerId.trim() !== '') {
                 acc[yearMonth].referral += 1;
             } else {
                 acc[yearMonth].direct += 1;
