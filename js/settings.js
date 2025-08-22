@@ -28,8 +28,8 @@ const database = getDatabase(app);
 
 // --- Google Drive API Configuration ---
 // IMPORTANT: Replace with your own API Key and Client ID from Google Cloud Console
-const GOOGLE_API_KEY = 'AIzaSyDar9gNwFZEud033oVF3Sqan8zyek8eVgM';
-const GOOGLE_CLIENT_ID = '482355049932-o9rompff6jm0p1f2rr7rasfhmgcdi42g.apps.googleusercontent.com';
+const GOOGLE_API_KEY = 'wala';
+const GOOGLE_CLIENT_ID = 'wala';
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
 let tokenClient;
