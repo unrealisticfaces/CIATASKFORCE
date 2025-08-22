@@ -30,7 +30,11 @@ async function fetchAllUsers() {
         if (snapshot.exists()) {
             const usersData = snapshot.val();
             Object.values(usersData).forEach(user => {
-                allUsersById.set(user.personalInfo.id, { ...user, children: [] });
+                // --- FIX: Handle both old and new data structures ---
+                const userId = user.importantInfo?.id || user.personalInfo?.id;
+                if (userId) {
+                    allUsersById.set(userId, { ...user, children: [] });
+                }
             });
         }
     } catch (error) {
@@ -82,10 +86,11 @@ function buildAndRenderTree(startUserId) {
 // --- Recursive function to create HTML nodes ---
 function createNodeElement(user) {
     const li = document.createElement('li');
-    li.id = `user-node-${user.personalInfo.id.replace(/\s+/g, '-')}`;
+    // --- FIX: Handle both old and new data structures ---
+    const userId = user.importantInfo?.id || user.personalInfo?.id;
+    li.id = `user-node-${userId.replace(/\s+/g, '-')}`;
     
-    const fullName = `${user.personalInfo.firstName || ''} ${user.personalInfo.lastName || ''}`.trim();
-    const userId = user.personalInfo.id;
+    const fullName = `${user.personalInfo?.firstName || ''} ${user.personalInfo?.lastName || ''}`.trim();
 
     const nodeLink = document.createElement('a');
     nodeLink.href = `./profile.html?id=${userId}`;

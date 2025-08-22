@@ -49,20 +49,30 @@ async function displayUserProfile() {
                 signatureImageDisplay.src = userData.otherInfo.signatureImageUrl;
             }
 
+            // Populate Important Info
+            const ii = userData.importantInfo;
+            populateElement('user-id', ii.id);
+            populateElement('id-no', ii.idNo);
+            populateElement('chapter', ii.chapter);
+            populateElement('join-date', ii.joinDate);
+
             // Populate Personal Info
             const pi = userData.personalInfo;
-            populateElement('id-no', pi.idNo); // Populate the new ID No field
             const fullName = `${pi.firstName || ''} ${pi.middleName || ''} ${pi.lastName || ''}`.replace(/\s+/g, ' ').trim();
             populateElement('full-name', fullName);
-            populateElement('contact-no', pi.contactNo);
             populateElement('dob', pi.dob);
+            populateElement('place-of-birth', pi.placeOfBirth);
             populateElement('age', pi.age);
             populateElement('sex', pi.sex);
-            populateElement('blood-type', pi.bloodType);
 
             // Populate Address
             const addr = userData.address;
             populateElement('address-line-1', addr.addressLine1);
+            populateElement('present-address', addr.presentAddress);
+            populateElement('permanent-address', addr.permanentAddress);
+            populateElement('contact-no', addr.contactNo);
+            populateElement('ofw', addr.isOfw ? 'Yes' : 'No');
+            populateElement('ofw-details', addr.ofwDetails);
             populateElement('region', addr.region);
             populateElement('province', addr.province);
             populateElement('city', addr.city);
@@ -73,7 +83,7 @@ async function displayUserProfile() {
             const other = userData.otherInfo;
             populateElement('occupation', other.occupation);
             populateElement('skills', other.skills);
-            populateElement('join-date', other.joinDate);
+            populateElement('membership-method', other.membershipMethod);
             
             // Display Referrer Info
             const referrerId = other.referrerId;
@@ -86,6 +96,19 @@ async function displayUserProfile() {
             } else {
                 populateElement('referrer-info', 'Direct');
             }
+
+            // Populate Health Info
+            const hi = userData.healthInfo;
+            populateElement('weight', hi.weight ? `${hi.weight} kg` : 'N/A');
+            populateElement('height', hi.height ? `${hi.height} cm` : 'N/A');
+            populateElement('blood-type', hi.bloodType);
+            populateElement('medications', hi.medications);
+
+            // Populate Social Media
+            const sm = userData.socialMedia;
+            populateElement('viber', sm.viber);
+            populateElement('email', sm.email);
+            populateElement('facebook', sm.facebook);
             
             // Populate Emergency Contact
             const ec = userData.emergencyContact;

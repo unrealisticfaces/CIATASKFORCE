@@ -33,22 +33,22 @@ function renderUsers(usersToDisplay) {
     }
 
     usersToDisplay.forEach(userData => {
-        const userId = userData.personalInfo.id;
-        const fullName = `${userData.personalInfo.firstName || ''} ${userData.personalInfo.lastName || ''}`.trim();
-        
-        // --- NEW: Get the 'addedBy' field ---
-        const addedBy = userData.otherInfo.addedBy || 'N/A';
+        // --- FIX: Handle both old and new data structures ---
+        const userId = userData.importantInfo?.id || userData.personalInfo?.id;
+        const fullName = `${userData.personalInfo?.firstName || ''} ${userData.personalInfo?.lastName || ''}`.trim();
+        const contactNo = userData.address?.contactNo || userData.personalInfo?.contactNo || 'N/A';
+        const joinDate = userData.importantInfo?.joinDate || userData.otherInfo?.joinDate || 'N/A';
+        const addedBy = userData.otherInfo?.addedBy || 'N/A';
 
         const row = document.createElement('tr');
         row.className = 'border-b border-gray-700 hover:bg-gray-700/50';
         
-        // --- UPDATED: Added the new 'addedBy' cell ---
         row.innerHTML = `
             <td class="p-4"><input type="checkbox" class="bg-gray-700 border-gray-600 rounded"></td>
             <td class="px-6 py-4 font-medium text-white">${userId}</td>
             <td class="px-6 py-4">${fullName}</td>
-            <td class="px-6 py-4">${userData.personalInfo.contactNo || 'N/A'}</td>
-            <td class="px-6 py-4">${userData.otherInfo.joinDate || 'N/A'}</td>
+            <td class="px-6 py-4">${contactNo}</td>
+            <td class="px-6 py-4">${joinDate}</td>
             <td class="px-6 py-4">${addedBy}</td>
             <td class="px-6 py-4">
                 <span class="flex items-center text-sm font-medium"><span class="flex w-2.5 h-2.5 bg-green-500 rounded-full mr-2"></span> Active</span>
@@ -74,7 +74,7 @@ async function displayUsers() {
         }
     } catch (error) {
         console.error("Error fetching users:", error);
-        tableBody.innerHTML = '<tr class="border-b border-gray-700"><td colspan="8" class="text-center px-6 py-12 text-red-400">Failed to load user data.</td></tr>';
+        tableBody.innerHTML = '<tr class="border-b border-gray-700"><td colspan="8" class="text-center px-6 py-12 text-red-400">Failed to load user data. See console for details.</td></tr>';
     }
 }
 
@@ -87,8 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchTerm = e.target.value.toLowerCase().trim();
         
         const filteredUsers = allUsers.filter(user => {
-            const fullName = `${user.personalInfo.firstName || ''} ${user.personalInfo.lastName || ''}`.toLowerCase();
-            const userId = user.personalInfo.id.toLowerCase();
+            const fullName = `${user.personalInfo?.firstName || ''} ${user.personalInfo?.lastName || ''}`.toLowerCase();
+            // --- FIX: Use correct path for the user ID in search ---
+            const userId = (user.importantInfo?.id || user.personalInfo?.id).toLowerCase();
             
             return fullName.includes(searchTerm) || userId.includes(searchTerm);
         });

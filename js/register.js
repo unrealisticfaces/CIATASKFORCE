@@ -39,6 +39,8 @@ const ageInput = document.getElementById('age');
 
 // --- Address Element References ---
 const ncrToggle = document.getElementById('ncr-toggle');
+const ofwToggle = document.getElementById('ofw-toggle');
+const ofwDetailsInput = document.getElementById('ofw-details');
 const addressDropdowns = document.getElementById('address-dropdowns');
 const addressManualInputs = document.getElementById('address-manual-inputs');
 
@@ -161,6 +163,13 @@ ncrToggle.addEventListener('change', () => {
     }
 });
 
+ofwToggle.addEventListener('change', () => {
+    ofwDetailsInput.disabled = !ofwToggle.checked;
+    if (!ofwToggle.checked) {
+        ofwDetailsInput.value = ''; // Clear input when disabled
+    }
+});
+
 regionSelect.addEventListener('change', async () => {
     resetDropdowns(provinceSelect, citySelect, barangaySelect);
     if (regionSelect.value) {
@@ -261,31 +270,50 @@ form.addEventListener('submit', async (e) => {
     }
     
     const userData = {
-        personalInfo: {
+        importantInfo: {
             id: newUserId,
             idNo: newIdNo,
+            chapter: document.getElementById('chapter').value,
+            joinDate: document.getElementById('join-date').value,
+        },
+        personalInfo: {
             firstName: newFirstName,
             middleName: document.getElementById('middle-name').value,
             lastName: newLastName,
-            contactNo: document.getElementById('contact-no').value,
             dob: document.getElementById('dob').value,
+            placeOfBirth: document.getElementById('place-of-birth').value,
             age: document.getElementById('age').value,
             sex: document.getElementById('sex').value,
-            bloodType: document.getElementById('blood-type').value,
         },
         address: {
             addressLine1: document.getElementById('address-line-1').value,
+            presentAddress: document.getElementById('present-address').value,
+            permanentAddress: document.getElementById('permanent-address').value,
+            isOfw: ofwToggle.checked,
+            ofwDetails: document.getElementById('ofw-details').value,
+            contactNo: document.getElementById('contact-no').value,
             ...addressData,
             zipCode: document.getElementById('zip-code').value,
         },
         otherInfo: {
             occupation: document.getElementById('occupation').value,
             skills: document.getElementById('skills').value,
-            joinDate: document.getElementById('join-date').value,
             referrerId: document.getElementById('referrer-id').value.trim(),
+            membershipMethod: document.getElementById('membership-method').value,
             profileImageUrl: profileImageUrl || '',
             signatureImageUrl: signatureImageUrl || '',
             addedBy: adminName // --- NEW: SAVE THE ADMIN NAME ---
+        },
+        healthInfo: {
+            weight: document.getElementById('weight').value,
+            height: document.getElementById('height').value,
+            bloodType: document.getElementById('blood-type').value,
+            medications: document.getElementById('medications').value,
+        },
+        socialMedia: {
+            viber: document.getElementById('viber').value,
+            email: document.getElementById('email').value,
+            facebook: document.getElementById('facebook').value,
         },
         emergencyContact: {
             lastName: document.getElementById('ec-last-name').value,
@@ -305,6 +333,8 @@ form.addEventListener('submit', async (e) => {
         form.reset();
         ncrToggle.checked = false; 
         ncrToggle.dispatchEvent(new Event('change'));
+        ofwToggle.checked = false;
+        ofwToggle.dispatchEvent(new Event('change'));
         
         initializePage(); 
     } catch (error) {

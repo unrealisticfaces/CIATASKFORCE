@@ -69,7 +69,7 @@
 
             <div class="mt-6">
                 <form id="registrationForm" class="bg-gray-800 p-8 rounded-lg text-gray-300">
-                    <h3 class="text-lg font-semibold text-white mb-6 border-b border-gray-700 pb-3">Personal Information</h3>
+                    <h3 class="text-lg font-semibold text-white mb-6 border-b border-gray-700 pb-3">Important Information</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label for="user-id" class="block text-sm font-medium">User-ID</label>
@@ -79,7 +79,18 @@
                             <label for="id-no" class="block text-sm font-medium">ID No.</label>
                             <input type="text" id="id-no" readonly class="mt-2 block w-full bg-gray-700 border-gray-600 rounded-lg px-4 py-2.5 cursor-not-allowed">
                         </div>
-                        <div class="md:col-span-1"></div>
+                        <div>
+                            <label for="chapter" class="block text-sm font-medium">Chapter</label>
+                            <input type="text" id="chapter" placeholder="City/Municipality" class="form-input">
+                        </div>
+                        <div>
+                            <label for="join-date" class="block text-sm font-medium">Join Date</label>
+                            <input type="date" id="join-date" class="form-input">
+                        </div>
+                    </div>
+
+                    <h3 class="text-lg font-semibold text-white mt-10 mb-6 border-b border-gray-700 pb-3">Personal Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label for="first-name" class="block text-sm font-medium">First Name</label>
                             <input type="text" id="first-name" required class="form-input">
@@ -93,12 +104,12 @@
                             <input type="text" id="last-name" required class="form-input">
                         </div>
                         <div>
-                            <label for="contact-no" class="block text-sm font-medium">Contact No.</label>
-                            <input type="tel" id="contact-no" class="form-input">
-                        </div>
-                        <div>
                             <label for="dob" class="block text-sm font-medium">Date of Birth</label>
                             <input type="date" id="dob" required class="form-input">
+                        </div>
+                        <div>
+                            <label for="place-of-birth" class="block text-sm font-medium">Place of Birth</label>
+                            <input type="text" id="place-of-birth" class="form-input">
                         </div>
                         <div>
                             <label for="age" class="block text-sm font-medium">Age</label>
@@ -112,14 +123,9 @@
                                 <option value="Female">Female</option>
                             </select>
                         </div>
-                        <div>
-                            <label for="blood-type" class="block text-sm font-medium">Blood Type</label>
-                            <input type="text" id="blood-type" class="form-input" placeholder="If known">
-                        </div>
                     </div>
 
-                    <!-- ADDRESS SECTION WITH TOGGLE -->
-                    <div class="flex items-center justify-between mt-10 mb-6 border-b border-gray-700 pb-3">
+                    <div class="flex items-center mt-10 mb-6 border-b border-gray-700 pb-3 gap-6">
                         <h3 class="text-lg font-semibold text-white">Address</h3>
                         <div class="flex items-center">
                             <span class="text-sm mr-3">Manual NCR Entry</span>
@@ -134,9 +140,36 @@
                         <label for="address-line-1" class="block text-sm font-medium">Address Line 1</label>
                         <input type="text" id="address-line-1" placeholder="House No., Street Name, Subdivision" required class="form-input">
                     </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                         <div>
+                            <label for="present-address" class="block text-sm font-medium">Present Address</label>
+                            <input type="text" id="present-address" class="form-input">
+                        </div>
+                        <div>
+                            <label for="permanent-address" class="block text-sm font-medium">Permanent Address</label>
+                            <input type="text" id="permanent-address" class="form-input">
+                        </div>
+                    </div>
 
-                    <!-- API DROPDOWNS (DEFAULT) -->
-                    <div id="address-dropdowns" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 items-end">
+                        <div>
+                            <label for="contact-no" class="block text-sm font-medium">Contact No.</label>
+                            <input type="tel" id="contact-no" class="form-input">
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="flex-grow">
+                                <label for="ofw-details" class="block text-sm font-medium">Are you OFW?</label>
+                                <input type="text" id="ofw-details" class="form-input" placeholder="Specify country/details..." disabled>
+                            </div>
+                            <div class="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+                                <input type="checkbox" name="toggle" id="ofw-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                <label for="ofw-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="address-dropdowns" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
                         <div>
                             <label for="region" class="block text-sm font-medium">Region</label>
                             <select id="region" required class="form-input">
@@ -163,8 +196,7 @@
                         </div>
                     </div>
 
-                    <!-- MANUAL TEXT FIELDS (HIDDEN BY DEFAULT) -->
-                    <div id="address-manual-inputs" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div id="address-manual-inputs" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
                         <div>
                             <label for="region-manual" class="block text-sm font-medium">Region</label>
                             <input type="text" id="region-manual" value="National Capital Region (NCR)" readonly class="form-input cursor-not-allowed">
@@ -201,12 +233,52 @@
                             <input type="text" id="skills" class="form-input">
                         </div>
                         <div>
-                            <label for="join-date" class="block text-sm font-medium">Join Date</label>
-                            <input type="date" id="join-date" class="form-input">
-                        </div>
-                        <div>
                             <label for="referrer-id" class="block text-sm font-medium">Referrer's ID</label>
                             <input type="text" id="referrer-id" class="form-input" placeholder="Leave blank if direct">
+                        </div>
+                        <div>
+                            <label for="membership-method" class="block text-sm font-medium">Membership Method</label>
+                            <select id="membership-method" class="form-input">
+                                <option value="New Member">New Member</option>
+                                <option value="Renewal">Renewal</option>
+                                <option value="Honorary">Honorary</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-lg font-semibold text-white mt-10 mb-6 border-b border-gray-700 pb-3">Health Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="weight" class="block text-sm font-medium">Weight (kg)</label>
+                            <input type="number" id="weight" class="form-input">
+                        </div>
+                        <div>
+                            <label for="height" class="block text-sm font-medium">Height (cm)</label>
+                            <input type="number" id="height" class="form-input">
+                        </div>
+                        <div>
+                            <label for="blood-type" class="block text-sm font-medium">Blood Type</label>
+                            <input type="text" id="blood-type" class="form-input" placeholder="If known">
+                        </div>
+                        <div class="md:col-span-3">
+                            <label for="medications" class="block text-sm font-medium">Medications / Supplements</label>
+                            <input type="text" id="medications" class="form-input">
+                        </div>
+                    </div>
+
+                    <h3 class="text-lg font-semibold text-white mt-10 mb-6 border-b border-gray-700 pb-3">Social Media Accounts</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="viber" class="block text-sm font-medium">Viber</label>
+                            <input type="text" id="viber" class="form-input">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium">Email</label>
+                            <input type="email" id="email" placeholder="Gmail / Yahoo Mail" class="form-input">
+                        </div>
+                        <div>
+                            <label for="facebook" class="block text-sm font-medium">Facebook</label>
+                            <input type="text" id="facebook" class="form-input" placeholder="URL or Name">
                         </div>
                     </div>
 

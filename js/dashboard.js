@@ -35,7 +35,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const today = new Date();
         const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-        const registrationsToday = usersArray.filter(user => user.otherInfo?.joinDate === todayString).length;
+        // --- FIX: Check both new and old locations for joinDate ---
+        const registrationsToday = usersArray.filter(user => {
+            const joinDate = user.importantInfo?.joinDate || user.otherInfo?.joinDate;
+            return joinDate === todayString;
+        }).length;
         
         const totalUsersStat = document.getElementById('total-users-stat');
         const registrationsTodayStat = document.getElementById('registrations-today-stat');
@@ -48,7 +52,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const dailyRegistrations = usersArray.reduce((acc, user) => {
-            const date = user.otherInfo?.joinDate;
+            // --- FIX: Check both new and old locations for joinDate ---
+            const date = user.importantInfo?.joinDate || user.otherInfo?.joinDate;
             if (date) {
                 acc[date] = (acc[date] || 0) + 1;
             }
@@ -147,11 +152,10 @@ function initializeSessionsChart(usersArray) {
     const directCounts = {};
     const referralCounts = {};
     usersArray.forEach(user => {
-        const date = user.otherInfo?.joinDate;
+        // --- FIX: Check both new and old locations for joinDate ---
+        const date = user.importantInfo?.joinDate || user.otherInfo?.joinDate;
         if (!date) return;
 
-        // --- THIS IS THE FIX ---
-        // Changed from referrerName to referrerId
         if (user.otherInfo.referrerId && user.otherInfo.referrerId.trim() !== '') {
             referralCounts[date] = (referralCounts[date] || 0) + 1;
         } else {
@@ -247,15 +251,14 @@ function initializeMonthlySessionsChart(usersArray) {
     if (!pageViewsCanvas) return;
 
     const monthlyData = usersArray.reduce((acc, user) => {
-        const joinDate = user.otherInfo?.joinDate;
+        // --- FIX: Check both new and old locations for joinDate ---
+        const joinDate = user.importantInfo?.joinDate || user.otherInfo?.joinDate;
         if (joinDate) {
             const date = new Date(joinDate);
             const yearMonth = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
             if (!acc[yearMonth]) {
                 acc[yearMonth] = { direct: 0, referral: 0 };
             }
-            // --- THIS IS THE FIX ---
-            // Changed from referrerName to referrerId
             if (user.otherInfo.referrerId && user.otherInfo.referrerId.trim() !== '') {
                 acc[yearMonth].referral += 1;
             } else {
