@@ -26,16 +26,6 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-// --- Google Drive API Configuration ---
-// IMPORTANT: Replace with your own API Key and Client ID from Google Cloud Console
-const GOOGLE_API_KEY = 'wala';
-const GOOGLE_CLIENT_ID = 'wala';
-const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-
-let tokenClient;
-let gapiInited = false;
-let gisInited = false;
-
 // --- System Stats Functionality ---
 async function displaySystemStats() {
     try {
@@ -177,69 +167,6 @@ async function downloadToComputer() {
     }
 }
 
-function initializeGapiClient() {
-    gapi.client.init({
-        apiKey: GOOGLE_API_KEY,
-        discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
-    }).then(() => gapiInited = true);
-}
-
-function initializeGisClient() {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID,
-        scope: SCOPES,
-        callback: '', // Callback will be set dynamically
-    });
-    gisInited = true;
-}
-
-async function uploadToGoogleDrive() {
-    const uploadBtn = document.getElementById('upload-gdrive-btn');
-    uploadBtn.disabled = true;
-    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Preparing...';
-    try {
-        const flattenedData = await prepareUserDataForExport();
-        if (!flattenedData) return;
-        tokenClient.callback = async (resp) => {
-            if (resp.error !== undefined) {
-                throw (resp);
-            }
-            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Uploading...';
-            const worksheet = XLSX.utils.json_to_sheet(flattenedData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
-            const xlsxData = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-            const blob = new Blob([new Uint8Array(xlsxData)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            const today = new Date().toISOString().slice(0, 10);
-            const fileName = `CIA_Users_Backup_${today}.xlsx`;
-            const form = new FormData();
-            form.append('metadata', new Blob([JSON.stringify({ name: fileName })], { type: 'application/json' }));
-            form.append('file', blob);
-            const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                method: 'POST',
-                headers: new Headers({ 'Authorization': `Bearer ${gapi.client.getToken().access_token}` }),
-                body: form,
-            });
-            if (response.ok) {
-                alert(`File "${fileName}" uploaded successfully to your Google Drive!`);
-            } else {
-                throw new Error('Upload failed.');
-            }
-        };
-        if (gapi.client.getToken() === null) {
-            tokenClient.requestAccessToken({ prompt: 'consent' });
-        } else {
-            tokenClient.requestAccessToken({ prompt: '' });
-        }
-    } catch (error) {
-        console.error("Error uploading to Google Drive:", error);
-        alert("An error occurred during the upload.");
-    } finally {
-        uploadBtn.disabled = false;
-        uploadBtn.innerHTML = '<i class="fab fa-google-drive mr-2"></i> Upload to Google Drive';
-    }
-}
-
 // --- Initial Setup ---
 document.addEventListener('DOMContentLoaded', () => {
     const loggedInUserString = sessionStorage.getItem('loggedInUser');
@@ -261,13 +188,4 @@ document.addEventListener('DOMContentLoaded', () => {
     closeModalBtn.addEventListener('click', () => backupModal.classList.add('hidden'));
 
     document.getElementById('download-xlsx-btn').addEventListener('click', downloadToComputer);
-    document.getElementById('upload-gdrive-btn').addEventListener('click', uploadToGoogleDrive);
-
-    gapi.load('client', initializeGapiClient);
-    const gisScript = document.createElement('script');
-    gisScript.src = 'https://accounts.google.com/gsi/client';
-    gisScript.async = true;
-    gisScript.defer = true;
-    gisScript.onload = initializeGisClient;
-    document.body.appendChild(gisScript);
 });

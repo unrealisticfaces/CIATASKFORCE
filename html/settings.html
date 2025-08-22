@@ -7,7 +7,6 @@
     <script type="module" src="../js/auth-guard.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://apis.google.com/js/api.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,7 +14,6 @@
     <link rel="stylesheet" href="../css/dashboard.css">
 </head>
 <body class="h-screen">
-    <!-- Inline script to prevent flicker -->
     <script>
         try {
             const loggedInUserString = sessionStorage.getItem('loggedInUser');
@@ -86,10 +84,9 @@
                 </div>
             </div>
 
-            <!-- NEW: Backup & Restore Section -->
             <div class="mt-8 bg-gray-800 p-8 rounded-lg">
                 <h3 class="text-lg font-semibold text-white">Backup & Restore</h3>
-                <p class="text-sm text-gray-400 mt-2">Create a backup of your user data by downloading it to your computer or uploading it to your Google Drive.</p>
+                <p class="text-sm text-gray-400 mt-2">Create a backup of your user data by downloading it to your computer.</p>
                 <div class="mt-6">
                     <button id="backup-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center">
                         <i class="fas fa-save mr-2"></i> Backup User Data
@@ -99,17 +96,13 @@
         </main>
     </div>
 
-    <!-- Backup Options Modal -->
     <div id="backup-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
         <div class="bg-gray-800 rounded-lg shadow-xl p-8 max-w-sm w-full">
-            <h3 class="text-lg font-bold text-white">Choose Backup Option</h3>
-            <p class="text-sm text-gray-400 mt-2">How would you like to back up the user data?</p>
+            <h3 class="text-lg font-bold text-white">Backup User Data</h3>
+            <p class="text-sm text-gray-400 mt-2">Download a complete backup of all user data to your computer as an XLSX file.</p>
             <div class="mt-6 space-y-4">
                 <button id="download-xlsx-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center">
                     <i class="fas fa-file-excel mr-2"></i> Download to Computer
-                </button>
-                <button id="upload-gdrive-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center">
-                    <i class="fab fa-google-drive mr-2"></i> Upload to Google Drive
                 </button>
             </div>
             <div class="mt-6 text-center">
