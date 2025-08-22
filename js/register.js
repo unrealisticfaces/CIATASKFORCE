@@ -29,17 +29,30 @@ const usersRef = ref(database, 'users');
 
 // --- Element References ---
 const form = document.getElementById('registrationForm');
-const idInput = document.getElementById('id-no');
+const userIdInput = document.getElementById('user-id');
+const idNoInput = document.getElementById('id-no');
 const messageDiv = document.getElementById('form-message');
+const profileImageInput = document.getElementById('profile-image');
+const signatureImageInput = document.getElementById('signature-image');
+const dobInput = document.getElementById('dob');
+const ageInput = document.getElementById('age');
+
+// --- Address Element References ---
+const ncrToggle = document.getElementById('ncr-toggle');
+const addressDropdowns = document.getElementById('address-dropdowns');
+const addressManualInputs = document.getElementById('address-manual-inputs');
+
+// Dropdown Selects
 const regionSelect = document.getElementById('region');
 const provinceSelect = document.getElementById('province');
 const citySelect = document.getElementById('city');
 const barangaySelect = document.getElementById('barangay');
-const profileImageInput = document.getElementById('profile-image');
-const signatureImageInput = document.getElementById('signature-image');
 
-// --- Caching for NCR data ---
-let ncrCitiesData = null;
+// Manual Text Inputs
+const regionManual = document.getElementById('region-manual');
+const provinceManual = document.getElementById('province-manual');
+const cityManual = document.getElementById('city-manual');
+const barangayManual = document.getElementById('barangay-manual');
 
 // --- Supabase Upload Helper Function ---
 async function uploadImageToSupabase(file, bucketName, userId, imageType) {
@@ -59,18 +72,36 @@ async function uploadImageToSupabase(file, bucketName, userId, imageType) {
 
 // --- PSGC API Helper Functions ---
 const PSGC_API_BASE = 'https://psgc.gitlab.io/api';
+const NCR_REGION_CODE = '130000000';
 
-async function fetchNcrCities() {
-    if (ncrCitiesData) return ncrCitiesData;
-    const response = await fetch('../js/data/ncr_cities.json');
-    ncrCitiesData = await response.json();
-    return ncrCitiesData;
+async function populateRegions() {
+    regionSelect.innerHTML = `<option value="" disabled selected>Loading...</option>`;
+    try {
+        const response = await fetch(`${PSGC_API_BASE}/regions/`);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        data.sort((a, b) => a.name.localeCompare(b.name));
+        regionSelect.innerHTML = `<option value="" disabled selected>Select Region</option>`;
+        data.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.code;
+            option.textContent = item.name;
+            if (item.code === NCR_REGION_CODE) {
+                option.disabled = true;
+            }
+            regionSelect.appendChild(option);
+        });
+        regionSelect.disabled = false;
+    } catch (error) {
+        console.error(`Failed to fetch regions:`, error);
+        regionSelect.innerHTML = `<option value="" disabled selected>Failed to load</option>`;
+    }
 }
 
-async function populateDropdown(selectElement, dataSource, nameProperty) {
+async function populateDropdown(selectElement, url) {
     selectElement.innerHTML = `<option value="" disabled selected>Loading...</option>`;
     try {
-        const response = await fetch(dataSource);
+        const response = await fetch(url);
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         data.sort((a, b) => a.name.localeCompare(b.name));
@@ -78,7 +109,7 @@ async function populateDropdown(selectElement, dataSource, nameProperty) {
         data.forEach(item => {
             const option = document.createElement('option');
             option.value = item.code;
-            option.textContent = item[nameProperty];
+            option.textContent = item.name;
             selectElement.appendChild(option);
         });
         selectElement.disabled = false;
@@ -97,43 +128,57 @@ function resetDropdowns(...dropdowns) {
 }
 
 // --- Event Listeners ---
+
+dobInput.addEventListener('change', () => {
+    const dob = new Date(dobInput.value);
+    if (isNaN(dob.getTime())) {
+        ageInput.value = '';
+        return;
+    }
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDifference = today.getMonth() - dob.getMonth();
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dob.getDate())) {
+        age--;
+    }
+    ageInput.value = age >= 0 ? age : '';
+});
+
+
+ncrToggle.addEventListener('change', () => {
+    const isManualMode = ncrToggle.checked;
+    addressDropdowns.classList.toggle('hidden', isManualMode);
+    addressManualInputs.classList.toggle('hidden', !isManualMode);
+    if (isManualMode) {
+        regionSelect.value = NCR_REGION_CODE;
+        regionSelect.disabled = true;
+        resetDropdowns(provinceSelect, citySelect, barangaySelect);
+    } else {
+        regionSelect.disabled = false;
+        regionSelect.value = '';
+        const ncrOption = regionSelect.querySelector(`option[value="${NCR_REGION_CODE}"]`);
+        if (ncrOption) ncrOption.disabled = true;
+    }
+});
+
 regionSelect.addEventListener('change', async () => {
     resetDropdowns(provinceSelect, citySelect, barangaySelect);
-    const NCR_CODE = '130000000';
-    if (regionSelect.value === NCR_CODE) {
-        provinceSelect.disabled = true;
-        provinceSelect.innerHTML = `<option value="N/A" selected>N/A</option>`;
-        const ncrCities = await fetchNcrCities();
-        citySelect.innerHTML = `<option value="" disabled selected>Select City / Municipality</option>`;
-        ncrCities.sort((a,b) => a.name.localeCompare(b.name)).forEach(city => {
-             const option = document.createElement('option');
-             option.value = city.code;
-             option.textContent = city.name;
-             citySelect.appendChild(option);
-        });
-        citySelect.disabled = false;
-        barangaySelect.innerHTML = `<option value="" disabled selected>Use Address Line 1</option>`;
-
-    } else if (regionSelect.value) {
-        provinceSelect.disabled = false;
-        await populateDropdown(provinceSelect, `${PSGC_API_BASE}/regions/${regionSelect.value}/provinces/`, 'name');
+    if (regionSelect.value) {
+        await populateDropdown(provinceSelect, `${PSGC_API_BASE}/regions/${regionSelect.value}/provinces/`);
     }
 });
 
 provinceSelect.addEventListener('change', () => {
     resetDropdowns(citySelect, barangaySelect);
     if (provinceSelect.value) {
-        populateDropdown(citySelect, `${PSGC_API_BASE}/provinces/${provinceSelect.value}/cities-municipalities/`, 'name');
+        populateDropdown(citySelect, `${PSGC_API_BASE}/provinces/${provinceSelect.value}/cities-municipalities/`);
     }
 });
 
 citySelect.addEventListener('change', () => {
     resetDropdowns(barangaySelect);
     if (citySelect.value) {
-        const selectedRegionName = regionSelect.options[regionSelect.selectedIndex].textContent;
-        if (selectedRegionName !== 'National Capital Region (NCR)') {
-            populateDropdown(barangaySelect, `${PSGC_API_BASE}/cities-municipalities/${citySelect.value}/barangays/`, 'name');
-        }
+        populateDropdown(barangaySelect, `${PSGC_API_BASE}/cities-municipalities/${citySelect.value}/barangays/`);
     }
 });
 
@@ -142,26 +187,86 @@ form.addEventListener('submit', async (e) => {
     messageDiv.textContent = 'Submitting...';
     messageDiv.className = 'text-center mt-4 text-blue-400';
 
-    const newId = idInput.value;
-    if (!newId || newId === "Generating..." || newId === "Error") {
-        messageDiv.textContent = 'Error: ID not generated.';
+    const newUserId = userIdInput.value;
+    const newIdNo = idNoInput.value;
+
+    if (!newUserId || newUserId === "Generating..." || newUserId === "Error") {
+        messageDiv.textContent = 'Error: User-ID not generated.';
         messageDiv.className = 'text-center mt-4 text-red-500';
         return;
     }
+    
+    // --- DUPLICATE CHECK LOGIC ---
+    const newFirstName = document.getElementById('first-name').value.trim();
+    const newLastName = document.getElementById('last-name').value.trim();
+    const newFullName = `${newFirstName} ${newLastName}`.toLowerCase();
+
+    try {
+        const snapshot = await get(usersRef);
+        if (snapshot.exists()) {
+            const usersData = snapshot.val();
+            for (const userId in usersData) {
+                const user = usersData[userId].personalInfo;
+                const existingFullName = `${user.firstName.trim()} ${user.lastName.trim()}`.toLowerCase();
+                if (existingFullName === newFullName) {
+                    messageDiv.textContent = `Error: A user with the name "${newFirstName} ${newLastName}" already exists.`;
+                    messageDiv.className = 'text-center mt-4 text-red-500';
+                    return; 
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Error checking for duplicate users:", error);
+        messageDiv.textContent = 'Error checking for duplicates. Please try again.';
+        messageDiv.className = 'text-center mt-4 text-red-500';
+        return;
+    }
+    
+    // --- NEW: GET LOGGED-IN ADMIN'S NAME ---
+    let adminName = 'Unknown';
+    try {
+        const loggedInUserString = sessionStorage.getItem('loggedInUser');
+        if (loggedInUserString) {
+            const loggedInUser = JSON.parse(loggedInUserString);
+            adminName = loggedInUser.displayName || 'Unknown';
+        }
+    } catch (error) {
+        console.error('Could not get admin name from session storage:', error);
+    }
+    // --- END ---
+
 
     const [profileImageUrl, signatureImageUrl] = await Promise.all([
-        uploadImageToSupabase(profileImageInput.files[0], 'profile-images', newId, 'profile'),
-        uploadImageToSupabase(signatureImageInput.files[0], 'signatures', newId, 'signature')
+        uploadImageToSupabase(profileImageInput.files[0], 'profile-images', newUserId, 'profile'),
+        uploadImageToSupabase(signatureImageInput.files[0], 'signatures', newUserId, 'signature')
     ]);
     
     const getSelectedText = (el) => (el.selectedIndex > 0) ? el.options[el.selectedIndex].textContent : '';
 
+    let addressData;
+    if (ncrToggle.checked) {
+        addressData = {
+            region: regionManual.value,
+            province: provinceManual.value,
+            city: cityManual.value,
+            barangay: barangayManual.value,
+        };
+    } else {
+        addressData = {
+            region: getSelectedText(regionSelect),
+            province: getSelectedText(provinceSelect),
+            city: getSelectedText(citySelect),
+            barangay: getSelectedText(barangaySelect),
+        };
+    }
+    
     const userData = {
         personalInfo: {
-            id: newId,
-            firstName: document.getElementById('first-name').value,
+            id: newUserId,
+            idNo: newIdNo,
+            firstName: newFirstName,
             middleName: document.getElementById('middle-name').value,
-            lastName: document.getElementById('last-name').value,
+            lastName: newLastName,
             contactNo: document.getElementById('contact-no').value,
             dob: document.getElementById('dob').value,
             age: document.getElementById('age').value,
@@ -170,10 +275,7 @@ form.addEventListener('submit', async (e) => {
         },
         address: {
             addressLine1: document.getElementById('address-line-1').value,
-            region: getSelectedText(regionSelect),
-            province: getSelectedText(provinceSelect),
-            city: getSelectedText(citySelect),
-            barangay: getSelectedText(barangaySelect),
+            ...addressData,
             zipCode: document.getElementById('zip-code').value,
         },
         otherInfo: {
@@ -183,23 +285,27 @@ form.addEventListener('submit', async (e) => {
             referrerId: document.getElementById('referrer-id').value.trim(),
             profileImageUrl: profileImageUrl || '',
             signatureImageUrl: signatureImageUrl || '',
+            addedBy: adminName // --- NEW: SAVE THE ADMIN NAME ---
         },
         emergencyContact: {
             lastName: document.getElementById('ec-last-name').value,
             firstName: document.getElementById('ec-first-name').value,
             middleName: document.getElementById('ec-middle-name').value,
             nickname: document.getElementById('ec-nickname').value,
+            relationship: document.getElementById('ec-relationship').value,
             contactNo: document.getElementById('ec-contact-no').value,
             address: document.getElementById('ec-address').value,
         }
     };
 
     try {
-        await set(child(usersRef, newId), userData);
+        await set(child(usersRef, newUserId), userData);
         messageDiv.textContent = 'User registered successfully!';
         messageDiv.className = 'text-center mt-4 text-green-500';
         form.reset();
-        resetDropdowns(provinceSelect, citySelect, barangaySelect);
+        ncrToggle.checked = false; 
+        ncrToggle.dispatchEvent(new Event('change'));
+        
         initializePage(); 
     } catch (error) {
         console.error("Firebase write failed: ", error);
@@ -210,16 +316,24 @@ form.addEventListener('submit', async (e) => {
 
 // --- Page Initialization ---
 async function initializePage() {
-    idInput.value = 'Generating...';
+    userIdInput.value = 'Generating...';
+    idNoInput.value = 'Generating...';
     try {
         const snapshot = await get(usersRef);
         const userCount = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
-        idInput.value = `100-${101 + userCount}`;
+        
+        userIdInput.value = `100-${101 + userCount}`;
+        
+        const newIdNumber = (userCount + 1).toString().padStart(7, '0');
+        idNoInput.value = `2025-${newIdNumber}`;
+
     } catch(error) {
         console.error("Could not fetch user count:", error);
-        idInput.value = "Error";
+        userIdInput.value = "Error";
+        idNoInput.value = "Error";
     }
-    populateDropdown(regionSelect, `${PSGC_API_BASE}/regions/`, 'name');
+    populateRegions();
+    resetDropdowns(provinceSelect, citySelect, barangaySelect);
 }
 
 document.addEventListener('DOMContentLoaded', initializePage);

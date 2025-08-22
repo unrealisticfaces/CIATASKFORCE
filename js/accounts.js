@@ -22,13 +22,13 @@ const usersRef = ref(database, 'users');
 // Store all users fetched from Firebase to enable client-side search
 let allUsers = [];
 
-// NEW: Function to render a given list of users into the table
+// Function to render a given list of users into the table
 function renderUsers(usersToDisplay) {
     const tableBody = document.getElementById('users-table-body');
     tableBody.innerHTML = ''; // Clear the table first
 
     if (usersToDisplay.length === 0) {
-        tableBody.innerHTML = '<tr class="border-b border-gray-700"><td colspan="7" class="text-center px-6 py-12 text-gray-400">No users match your search.</td></tr>';
+        tableBody.innerHTML = '<tr class="border-b border-gray-700"><td colspan="8" class="text-center px-6 py-12 text-gray-400">No users match your search.</td></tr>';
         return;
     }
 
@@ -36,15 +36,20 @@ function renderUsers(usersToDisplay) {
         const userId = userData.personalInfo.id;
         const fullName = `${userData.personalInfo.firstName || ''} ${userData.personalInfo.lastName || ''}`.trim();
         
+        // --- NEW: Get the 'addedBy' field ---
+        const addedBy = userData.otherInfo.addedBy || 'N/A';
+
         const row = document.createElement('tr');
         row.className = 'border-b border-gray-700 hover:bg-gray-700/50';
         
+        // --- UPDATED: Added the new 'addedBy' cell ---
         row.innerHTML = `
             <td class="p-4"><input type="checkbox" class="bg-gray-700 border-gray-600 rounded"></td>
             <td class="px-6 py-4 font-medium text-white">${userId}</td>
             <td class="px-6 py-4">${fullName}</td>
             <td class="px-6 py-4">${userData.personalInfo.contactNo || 'N/A'}</td>
             <td class="px-6 py-4">${userData.otherInfo.joinDate || 'N/A'}</td>
+            <td class="px-6 py-4">${addedBy}</td>
             <td class="px-6 py-4">
                 <span class="flex items-center text-sm font-medium"><span class="flex w-2.5 h-2.5 bg-green-500 rounded-full mr-2"></span> Active</span>
             </td>
@@ -56,25 +61,24 @@ function renderUsers(usersToDisplay) {
     });
 }
 
-// MODIFIED: This function now fetches all users and calls the render function
+// This function now fetches all users and calls the render function
 async function displayUsers() {
     const tableBody = document.getElementById('users-table-body');
     try {
         const snapshot = await get(usersRef);
         if (snapshot.exists()) {
-            // Convert snapshot to array and store it
             allUsers = Object.values(snapshot.val());
-            renderUsers(allUsers); // Render all users initially
+            renderUsers(allUsers); 
         } else {
-            tableBody.innerHTML = '<tr class="border-b border-gray-700"><td colspan="7" class="text-center px-6 py-12 text-gray-400">No users found in the database.</td></tr>';
+            tableBody.innerHTML = '<tr class="border-b border-gray-700"><td colspan="8" class="text-center px-6 py-12 text-gray-400">No users found in the database.</td></tr>';
         }
     } catch (error) {
         console.error("Error fetching users:", error);
-        tableBody.innerHTML = '<tr class="border-b border-gray-700"><td colspan="7" class="text-center px-6 py-12 text-red-400">Failed to load user data.</td></tr>';
+        tableBody.innerHTML = '<tr class="border-b border-gray-700"><td colspan="8" class="text-center px-6 py-12 text-red-400">Failed to load user data.</td></tr>';
     }
 }
 
-// MODIFIED: Event listener now also sets up the search functionality
+// Event listener now also sets up the search functionality
 document.addEventListener('DOMContentLoaded', () => {
     displayUsers();
 

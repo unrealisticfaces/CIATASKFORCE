@@ -18,15 +18,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-// Global variable to hold all user data for searching
+// Global variables
 let allUsersById = new Map();
+let currentSearchId = null;
 
 // --- Fetch all user data once when the page loads ---
 async function fetchAllUsers() {
     try {
         const usersRef = ref(database, 'users');
         const snapshot = await get(usersRef);
-
         if (snapshot.exists()) {
             const usersData = snapshot.val();
             Object.values(usersData).forEach(user => {
@@ -38,20 +38,22 @@ async function fetchAllUsers() {
     }
 }
 
-// --- Main function to build and render a specific user's tree ---
-function buildGenealogyTree(startUserId) {
+// --- Main function to build and render the tree ---
+function buildAndRenderTree(startUserId) {
+    currentSearchId = startUserId;
     const container = document.getElementById('genealogy-container');
+    const treeRoot = document.getElementById('tree-root');
+    const svg = document.getElementById('tree-lines-svg');
     container.innerHTML = ''; // Clear previous results
+    svg.innerHTML = ''; // Clear previous SVG lines
 
     if (!allUsersById.has(startUserId)) {
         container.innerHTML = `<p class="text-yellow-400">User ID "${startUserId}" not found.</p>`;
         return;
     }
 
-    // Reset children arrays before rebuilding
+    // Build the hierarchy
     allUsersById.forEach(user => user.children = []);
-
-    // Build the full tree structure in memory
     allUsersById.forEach(user => {
         const referrerId = user.otherInfo?.referrerId?.trim();
         if (referrerId && allUsersById.has(referrerId)) {
@@ -60,20 +62,28 @@ function buildGenealogyTree(startUserId) {
     });
 
     const rootUser = allUsersById.get(startUserId);
+    const isMobile = window.innerWidth <= 768;
 
-    if (rootUser.children.length === 0) {
-        container.innerHTML = `<p class="text-gray-400">User "${rootUser.personalInfo.firstName} ${rootUser.personalInfo.lastName}" has not referred anyone.</p>`;
-        return;
+    // Set layout class
+    treeRoot.className = isMobile ? 'tree mobile-tree' : 'tree desktop-tree';
+
+    // Build HTML
+    const treeUl = document.createElement('ul');
+    treeUl.appendChild(createNodeElement(rootUser));
+    container.appendChild(treeUl);
+
+    // --- DRAW SVG LINES ONLY ON DESKTOP ---
+    if (!isMobile) {
+        // Use a short timeout to ensure the DOM is fully updated before drawing
+        setTimeout(drawSvgConnectors, 50);
     }
-
-    const treeRootUl = document.createElement('ul');
-    treeRootUl.appendChild(createNodeElement(rootUser));
-    container.appendChild(treeRootUl);
 }
 
-// --- Recursive function to create each node element ---
+// --- Recursive function to create HTML nodes ---
 function createNodeElement(user) {
     const li = document.createElement('li');
+    li.id = `user-node-${user.personalInfo.id.replace(/\s+/g, '-')}`;
+    
     const fullName = `${user.personalInfo.firstName || ''} ${user.personalInfo.lastName || ''}`.trim();
     const userId = user.personalInfo.id;
 
@@ -95,9 +105,44 @@ function createNodeElement(user) {
     return li;
 }
 
+// --- Function to draw connectors using SVG (FOR DESKTOP ONLY) ---
+function drawSvgConnectors() {
+    const svg = document.getElementById('tree-lines-svg');
+    const treeRoot = document.getElementById('tree-root');
+    svg.innerHTML = ''; // Clear previous lines
+
+    const wrapperRect = treeRoot.getBoundingClientRect();
+    const parentNodes = treeRoot.querySelectorAll('li:has(ul)');
+
+    parentNodes.forEach(parentLi => {
+        const parentRect = parentLi.querySelector('a').getBoundingClientRect();
+        const childrenUl = parentLi.querySelector('ul');
+        const childrenLi = childrenUl.querySelectorAll('li');
+
+        childrenLi.forEach(childLi => {
+            const childRect = childLi.querySelector('a').getBoundingClientRect();
+            
+            // Calculate coordinates relative to the tree-wrapper
+            const startX = parentRect.left + parentRect.width / 2 - wrapperRect.left;
+            const startY = parentRect.bottom - wrapperRect.top;
+            const endX = childRect.left + childRect.width / 2 - wrapperRect.left;
+            const endY = childRect.top - wrapperRect.top;
+            const midY = startY + (endY - startY) / 2;
+
+            const pathData = `M ${startX},${startY} L ${startX},${midY} L ${endX},${midY} L ${endX},${endY}`;
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', pathData);
+            path.setAttribute('stroke', '#4b5563');
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('fill', 'none');
+            svg.appendChild(path);
+        });
+    });
+}
+
 // --- Event Listeners ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Fetch all users as soon as the page loads
     fetchAllUsers();
 
     const searchForm = document.getElementById('genealogy-search-form');
@@ -107,7 +152,18 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const searchId = searchInput.value.trim();
         if (searchId) {
-            buildGenealogyTree(searchId);
+            buildAndRenderTree(searchId);
         }
+    });
+
+    // Redraw on resize
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            if (currentSearchId) {
+                buildAndRenderTree(currentSearchId);
+            }
+        }, 200);
     });
 });

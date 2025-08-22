@@ -19,23 +19,9 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const dbRef = ref(database);
 
-// Function to get a parameter from the URL
-function getQueryParam(param) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
-}
-
-// Helper function to populate an element's text content
-function populateElement(id, value) {
-    const element = document.getElementById(id);
-    if (element) {
-        element.textContent = value || 'N/A';
-    }
-}
-
-// Main function to fetch and display the user's profile
+// --- Main function to fetch and display the user's profile ---
 async function displayUserProfile() {
-    const userId = getQueryParam('id');
+    const userId = getQueryParam('id'); // This is the User-ID (100-X)
     const profileContainer = document.getElementById('profile-container');
     const profileImageDisplay = document.getElementById('profile-image-display');
     const signatureImageDisplay = document.getElementById('signature-image-display');
@@ -48,6 +34,10 @@ async function displayUserProfile() {
     populateElement('user-id-header', userId);
 
     try {
+        // Fetch all users to create a lookup map for referrer's name
+        const allUsersSnapshot = await get(ref(database, 'users'));
+        const allUsersData = allUsersSnapshot.exists() ? allUsersSnapshot.val() : {};
+
         const userSnapshot = await get(child(dbRef, `users/${userId}`));
         if (userSnapshot.exists()) {
             const userData = userSnapshot.val();
@@ -61,6 +51,7 @@ async function displayUserProfile() {
 
             // Populate Personal Info
             const pi = userData.personalInfo;
+            populateElement('id-no', pi.idNo); // Populate the new ID No field
             const fullName = `${pi.firstName || ''} ${pi.middleName || ''} ${pi.lastName || ''}`.replace(/\s+/g, ' ').trim();
             populateElement('full-name', fullName);
             populateElement('contact-no', pi.contactNo);
@@ -71,7 +62,7 @@ async function displayUserProfile() {
 
             // Populate Address
             const addr = userData.address;
-            populateElement('address-line-1', addr.addressLine1); // <-- ADDED THIS LINE
+            populateElement('address-line-1', addr.addressLine1);
             populateElement('region', addr.region);
             populateElement('province', addr.province);
             populateElement('city', addr.city);
@@ -83,13 +74,25 @@ async function displayUserProfile() {
             populateElement('occupation', other.occupation);
             populateElement('skills', other.skills);
             populateElement('join-date', other.joinDate);
-            populateElement('referrer-name', other.referrerName);
+            
+            // Display Referrer Info
+            const referrerId = other.referrerId;
+            if (referrerId && allUsersData[referrerId]) {
+                const referrer = allUsersData[referrerId].personalInfo;
+                const referrerFullName = `${referrer.firstName || ''} ${referrer.lastName || ''}`.trim();
+                populateElement('referrer-info', `${referrerFullName} (ID: ${referrerId})`);
+            } else if (referrerId) {
+                populateElement('referrer-info', `ID: ${referrerId} (User not found)`);
+            } else {
+                populateElement('referrer-info', 'Direct');
+            }
             
             // Populate Emergency Contact
             const ec = userData.emergencyContact;
             const ecFullName = `${ec.firstName || ''} ${ec.middleName || ''} ${ec.lastName || ''}`.replace(/\s+/g, ' ').trim();
             populateElement('ec-full-name', ecFullName);
             populateElement('ec-nickname', ec.nickname);
+            populateElement('ec-relationship', ec.relationship);
             populateElement('ec-contact-no', ec.contactNo);
             populateElement('ec-address', ec.address);
 
@@ -100,6 +103,19 @@ async function displayUserProfile() {
         console.error("Error fetching user profile:", error);
         profileContainer.innerHTML = '<p class="text-center text-red-400">Failed to load user profile.</p>';
     }
+}
+
+// Helper function to populate an element's text content
+function populateElement(id, value) {
+    const element = document.getElementById(id);
+    if (element) {
+        element.textContent = value || 'N/A';
+    }
+}
+
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
 }
 
 document.addEventListener('DOMContentLoaded', displayUserProfile);
