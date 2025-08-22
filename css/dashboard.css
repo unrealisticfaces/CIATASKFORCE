@@ -72,7 +72,12 @@ body {
     z-index: 40;
     display: none;
 }
-
+#settings-link {
+    display: none;
+}
+body.role-superadmin #settings-link {
+    display: flex;
+}
 /* Hide the menu button and show the sidebar on larger screens */
 @media (min-width: 768px) {
     .menu-button, .overlay {

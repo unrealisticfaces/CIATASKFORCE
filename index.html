@@ -17,7 +17,7 @@
 
     <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
         <div class="text-center">
-            <img src="./js/data/indexwall.png" alt="CIA Task Force Logo" class="w-24 h-24 mx-auto mb-4 rounded-full" onerror="this.onerror=null;this.src='https://placehold.co/96x96/cccccc/333333?text=Logo';">
+            <img src="./js/data/indexwall.webp" alt="CIA Task Force Logo" class="w-24 h-24 mx-auto mb-4 rounded-full" onerror="this.onerror=null;this.src='https://placehold.co/96x96/cccccc/333333?text=Logo';">
             <h1 class="text-3xl font-bold text-gray-800">CIA TASK FORCE</h1>
             <p class="text-gray-500">Please sign in to continue</p>
         </div>
@@ -103,12 +103,12 @@
                         messageDiv.textContent = 'Login successful! Redirecting...';
                         messageDiv.className = 'text-center text-sm text-green-600 font-semibold';
                         
-                        // *** THIS IS THE FIX ***
-                        // It saves the logged-in admin's details to sessionStorage
+                        // *** UPDATED: Now saves the admin's role ***
                         sessionStorage.setItem('isLoggedIn', 'true');
                         sessionStorage.setItem('loggedInUser', JSON.stringify({
                             displayName: loggedInAdmin.displayName || 'Admin User',
-                            email: loggedInAdmin.email || 'admin@email.com'
+                            email: loggedInAdmin.email || 'admin@email.com',
+                            role: loggedInAdmin.role || 'admin' // <-- Save the role
                         }));
 
                         setTimeout(() => {

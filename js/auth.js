@@ -19,37 +19,64 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
 
-// --- NEW: INACTIVITY TIMEOUT LOGIC ---
-
-// Set the timeout duration in milliseconds. 5 minutes = 5 * 60 * 1000 = 300000 ms
-const INACTIVITY_TIMEOUT = 300000; 
+// --- INACTIVITY TIMEOUT LOGIC ---
+const INACTIVITY_TIMEOUT = 300000; // 5 minutes
 let inactivityTimer;
 
-// Function to log the user out
 function performLogout() {
     sessionStorage.removeItem('isLoggedIn');
     sessionStorage.removeItem('loggedInUser');
-    // You can add a query parameter to show a message on the login page
     window.location.href = '../index.html?reason=inactivity'; 
 }
 
-// Function to reset the inactivity timer
 function resetInactivityTimer() {
-    // Clear the previous timer
     clearTimeout(inactivityTimer);
-    // Start a new timer
     inactivityTimer = setTimeout(performLogout, INACTIVITY_TIMEOUT);
 }
 
 
-// --- EXISTING FUNCTIONALITY ---
+// --- Function to load app config and control UI ---
+async function initializeUI() {
+    // 1. Load App Configuration from Firebase
+    try {
+        const configRef = ref(database, 'config');
+        const snapshot = await get(configRef);
+        if (snapshot.exists()) {
+            const config = snapshot.val();
+            document.getElementById('sidebar-logo').src = config.logoUrl || '../js/data/indexwall.webp';
+            document.getElementById('sidebar-app-name').textContent = config.appName || 'CIA TASK FORCE';
+        }
+    } catch (error) {
+        console.error("Failed to load app configuration:", error);
+    }
+
+    // 2. Check User Role and add a class to the body
+    try {
+        const loggedInUserString = sessionStorage.getItem('loggedInUser');
+        if (loggedInUserString) {
+            const loggedInUser = JSON.parse(loggedInUserString);
+            
+            // *** THIS IS THE FIX ***
+            // Add a class to the body based on the user's role
+            if (loggedInUser.role === 'superadmin') {
+                document.body.classList.add('role-superadmin');
+            } else {
+                document.body.classList.add('role-admin');
+            }
+        }
+    } catch (error) {
+        console.error("Failed to check user role:", error);
+    }
+}
+
 
 document.addEventListener('DOMContentLoaded', () => {
+    initializeUI();
+
     const userProfileButton = document.getElementById('userProfileButton');
     const logoutMenu = document.getElementById('logoutMenu');
     const logoutButton = document.getElementById('logoutButton');
 
-    // Function to update the user profile display in the sidebar
     function updateUserProfileDisplay() {
         const loggedInUserString = sessionStorage.getItem('loggedInUser');
         if (loggedInUserString) {
@@ -73,10 +100,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Call the function to update the profile on page load
     updateUserProfileDisplay();
 
-    // Event listeners for logout menu
     if (userProfileButton) {
         userProfileButton.addEventListener('click', (event) => {
             event.stopPropagation();
@@ -85,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (logoutButton) {
-        logoutButton.addEventListener('click', performLogout); // Use the new logout function
+        logoutButton.addEventListener('click', performLogout);
     }
 
     window.addEventListener('click', () => {
@@ -93,15 +118,11 @@ document.addEventListener('DOMContentLoaded', () => {
             logoutMenu.classList.add('hidden');
         }
     });
-
-    // --- NEW: START THE INACTIVITY TIMER ---
     
-    // Listen for user activity events
+    // Start the inactivity timer
     window.addEventListener('mousemove', resetInactivityTimer);
     window.addEventListener('keypress', resetInactivityTimer);
     window.addEventListener('click', resetInactivityTimer);
     window.addEventListener('scroll', resetInactivityTimer);
-    
-    // Start the timer for the first time when the page loads
     resetInactivityTimer();
 });

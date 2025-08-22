@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - System Stats & Backup</title>
+    <script type="module" src="../js/auth-guard.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+</head>
+<body class="h-screen">
+    <!-- Inline script to prevent flicker -->
+    <script>
+        try {
+            const loggedInUserString = sessionStorage.getItem('loggedInUser');
+            if (loggedInUserString) {
+                const loggedInUser = JSON.parse(loggedInUserString);
+                if (loggedInUser.role === 'superadmin') {
+                    document.body.classList.add('role-superadmin');
+                } else {
+                    document.body.classList.add('role-admin');
+                }
+            }
+        } catch (e) { console.error('Role initialization script failed:', e); }
+    </script>
+
+    <button id="menu-btn" class="menu-button p-2 md:hidden">
+        <i class="fas fa-bars text-2xl"></i>
+    </button>
+    <div id="overlay" class="overlay"></div>
+    <div class="flex flex-col h-screen md:flex-row main-wrapper">
+        <aside id="sidebar" class="sidebar w-64 flex-shrink-0 bg-gray-900 p-4 flex flex-col justify-between z-50">
+            <div>
+                <div class="flex items-center mb-8">
+                    <img id="sidebar-logo" src="../js/data/indexwall.webp" alt="CIA Logo" class="h-8 w-8 rounded-full mr-2">
+                    <h1 id="sidebar-app-name" class="text-xl font-bold text-white">CIA TASK FORCE</h1>
+                </div>
+                <nav class="space-y-2">
+                    <a href="./dashboard.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-home sidebar-icon mr-3"></i> Home</a>
+                    <a href="./register.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-user-plus sidebar-icon mr-3"></i> Register</a>
+                    <a href="./accounts.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-users sidebar-icon mr-3"></i> Accounts</a>
+                    <a href="./analytics.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-400 hover:bg-gray-700 hover:text-white rounded-lg"><i class="fas fa-chart-line sidebar-icon mr-3"></i> Analytics</a>
+                    <a id="settings-link" href="./settings.html" class="flex items-center px-4 py-2.5 text-sm font-medium text-white bg-gray-700 rounded-lg"><i class="fas fa-cog sidebar-icon mr-3"></i> Settings</a>
+                </nav>
+            </div>
+            <div class="relative">
+                <div id="logoutMenu" class="absolute bottom-full left-0 mb-2 w-full bg-gray-800 rounded-lg shadow-lg hidden">
+                    <a href="#" id="logoutButton" class="flex items-center px-4 py-3 text-sm text-red-400 hover:bg-gray-700 rounded-lg"><i class="fas fa-sign-out-alt w-5 h-5 mr-3"></i>Logout</a>
+                </div>
+                <div id="userProfileButton" class="flex items-center p-2 border-t border-gray-700 mt-4 cursor-pointer hover:bg-gray-800 rounded-lg">
+                    <img class="h-10 w-10 rounded-full object-cover" src="https://placehold.co/100x100/667eea/ffffff?text=RR" alt="User avatar">
+                    <div class="ml-3">
+                        <p class="text-sm font-semibold text-white">Riley Carter</p>
+                        <p class="text-xs text-gray-400">riley@email.com</p>
+                    </div>
+                    <div class="ml-auto text-gray-400"><i class="fas fa-ellipsis-v"></i></div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto p-8 main-content">
+            <header class="flex items-center justify-between pb-4 border-b border-gray-700">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Settings</h2>
+                    <p class="text-gray-400">System stats and data management (Super Admin only).</p>
+                </div>
+            </header>
+
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-gray-800 p-6 rounded-lg"><div class="flex items-center"><i class="fas fa-users text-blue-400 text-2xl mr-4"></i><div><p class="text-sm text-gray-400">Total Users</p><p id="total-users-stat" class="text-2xl font-bold text-white">...</p></div></div></div>
+                <div class="bg-gray-800 p-6 rounded-lg"><div class="flex items-center"><i class="fas fa-user-shield text-green-400 text-2xl mr-4"></i><div><p class="text-sm text-gray-400">Total Admins</p><p id="total-admins-stat" class="text-2xl font-bold text-white">...</p></div></div></div>
+                <div class="bg-gray-800 p-6 rounded-lg"><div class="flex items-center"><i class="fas fa-database text-yellow-400 text-2xl mr-4"></i><div><p class="text-sm text-gray-400">Firebase DB Size (Est.)</p><p id="firebase-usage-stat" class="text-2xl font-bold text-white">...</p></div></div></div>
+                <div class="bg-gray-800 p-6 rounded-lg"><div class="flex items-center"><i class="fas fa-file-upload text-purple-400 text-2xl mr-4"></i><div><p class="text-sm text-gray-400">Supabase Files</p><p id="supabase-usage-stat" class="text-2xl font-bold text-white">...</p></div></div></div>
+            </div>
+
+            <div class="mt-8 bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-lg font-semibold text-white">User Registrations Over Time</h3>
+                <div class="chart-container-large mt-4">
+                    <canvas id="registrations-timeline-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- NEW: Backup & Restore Section -->
+            <div class="mt-8 bg-gray-800 p-8 rounded-lg">
+                <h3 class="text-lg font-semibold text-white">Backup & Restore</h3>
+                <p class="text-sm text-gray-400 mt-2">Create a backup of your user data by downloading it to your computer or uploading it to your Google Drive.</p>
+                <div class="mt-6">
+                    <button id="backup-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-save mr-2"></i> Backup User Data
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Backup Options Modal -->
+    <div id="backup-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg shadow-xl p-8 max-w-sm w-full">
+            <h3 class="text-lg font-bold text-white">Choose Backup Option</h3>
+            <p class="text-sm text-gray-400 mt-2">How would you like to back up the user data?</p>
+            <div class="mt-6 space-y-4">
+                <button id="download-xlsx-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-file-excel mr-2"></i> Download to Computer
+                </button>
+                <button id="upload-gdrive-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center">
+                    <i class="fab fa-google-drive mr-2"></i> Upload to Google Drive
+                </button>
+            </div>
+            <div class="mt-6 text-center">
+                <button id="close-modal-btn" class="text-gray-400 hover:text-white text-sm">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="../js/auth.js"></script>
+    <script type="module" src="../js/settings.js"></script>
+    
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const menuBtn = document.getElementById('menu-btn');
+        
+        menuBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            sidebar.classList.toggle('open');
+            overlay.style.display = 'block';
+        });
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            overlay.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
