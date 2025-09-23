@@ -64,7 +64,7 @@ async function displaySystemStats() {
 
 function createRegistrationsChart(usersArray) {
     const monthlyData = usersArray.reduce((acc, user) => {
-        const joinDate = user.otherInfo?.joinDate;
+        const joinDate = user.importantInfo?.joinDate;
         if (joinDate) {
             const date = new Date(joinDate);
             const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -115,16 +115,16 @@ async function prepareUserDataForExport() {
     }
     const allUsers = Object.values(snapshot.val());
     return allUsers.map(user => ({
-        "User ID": user.personalInfo.id,
-        "ID No": user.personalInfo.idNo,
+        "User ID": user.importantInfo.id,
+        "ID No": user.importantInfo.idNo,
         "First Name": user.personalInfo.firstName,
         "Middle Name": user.personalInfo.middleName,
         "Last Name": user.personalInfo.lastName,
-        "Contact No": user.personalInfo.contactNo,
+        "Contact No": user.address.contactNo,
         "Date of Birth": user.personalInfo.dob,
         "Age": user.personalInfo.age,
         "Sex": user.personalInfo.sex,
-        "Blood Type": user.personalInfo.bloodType,
+        "Blood Type": user.healthInfo.bloodType,
         "Address Line 1": user.address.addressLine1,
         "Region": user.address.region,
         "Province": user.address.province,
@@ -133,7 +133,7 @@ async function prepareUserDataForExport() {
         "Zip Code": user.address.zipCode,
         "Occupation": user.otherInfo.occupation,
         "Skills": user.otherInfo.skills,
-        "Join Date": user.otherInfo.joinDate,
+        "Join Date": user.importantInfo.joinDate,
         "Referred By ID": user.otherInfo.referrerId,
         "Added By": user.otherInfo.addedBy,
         "EC Last Name": user.emergencyContact.lastName,
